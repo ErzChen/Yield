@@ -1,17 +1,14 @@
-//
-//  YieldApp.swift
-//  Yield
-//
-//  Created by Eric Chen on 2026-10-15.
-//
-
 import SwiftUI
 
 @main
 struct YieldApp: App {
+    @State private var currentTab: String = "Today"
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Spacer()
+            NavBar(currentTab: $currentTab)
         }
+        
     }
 }
+

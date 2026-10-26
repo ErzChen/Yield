@@ -6,13 +6,31 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		424767B9308E661300D421E6 /* .gitignore in Sources */ = {isa = PBXBuildFile; fileRef = 424767B8308E661000D421E6 /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		424767B8308E661000D421E6 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		42DFA2CC308182E10020336A /* Yield.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Yield.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		42B5EC81308C350D00B92472 /* Exceptions for "Yield" folder in "Yield" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 42DFA2CB308182E10020336A /* Yield */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		42DFA2CE308182E10020336A /* Yield */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				42B5EC81308C350D00B92472 /* Exceptions for "Yield" folder in "Yield" target */,
+			);
 			path = Yield;
 			sourceTree = "<group>";
 		};
@@ -31,6 +49,7 @@
 			isa = PBXGroup;
 			children = (
 				42DFA2CE308182E10020336A /* Yield */,
+				424767B8308E661000D421E6 /* .gitignore */,
 				42DFA2CD308182E10020336A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -72,7 +91,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2700;
-				LastUpgradeCheck = 2700;
+				LastUpgradeCheck = 2710;
 				TargetAttributes = {
 					42DFA2CB308182E10020336A = {
 						CreatedOnToolsVersion = 27.0;
@@ -110,6 +129,7 @@
 		42DFA2C8308182E10020336A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			files = (
+				424767B9308E661300D421E6 /* .gitignore in Sources */,
 			);
 		};
 /* End PBXSourcesBuildPhase section */
@@ -173,6 +193,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -229,6 +250,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -243,6 +265,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Yield/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -274,6 +297,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Yield/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
