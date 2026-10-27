@@ -13,7 +13,7 @@ struct NavBar: View {
             slot(tabSymbol: "chart.xyaxis.line", tabTitle: "Insights", actionSymbol: "map", actionTitle: "Spots")
             logButton
             slot(tabSymbol: "text.book.closed", tabTitle: "Library", actionSymbol: "camera", actionTitle: "Photo")
-            slot(tabSymbol: "person.crop.circle", tabTitle: "User", actionSymbol: "figure.walk", actionTitle: "Trip")
+            slot(tabSymbol: "person.crop.circle", tabTitle: "You", actionSymbol: "figure.walk", actionTitle: "Trip")
         }
         .padding(.top, 8)
         .background {
@@ -62,7 +62,7 @@ struct NavBar: View {
                     .font(.system(size: 22))
                     .frame(height: 28)
                 Text(title)
-                    .font(Font.manropeBold(size: Font.Size.small))
+                    .font(Font.manropeBold(size: Font.text))
             }
             .foregroundStyle(isSelected ? Color.Palette.green : Color.Palette.darkBrown.opacity(0.6))
             .frame(maxWidth: .infinity)
@@ -79,7 +79,7 @@ struct NavBar: View {
                     .font(.system(size: 22))
                     .frame(height: 28)
                 Text(title)
-                    .font(Font.manropeBold(size: Font.Size.small))
+                    .font(Font.manropeBold(size: Font.text))
             }
             .foregroundStyle(Color.surface)
             .frame(maxWidth: .infinity)

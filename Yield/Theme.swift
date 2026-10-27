@@ -17,6 +17,12 @@ extension Color {
 }
 
 extension Font {
+    static func besleyRegular(size: CGFloat) -> Font {
+        .custom("Besley-Regular", size: size)
+    }
+    static func besleyMedium(size: CGFloat) -> Font {
+        .custom("Besley-Bold", size: size)
+    }
     static func besleyBold(size: CGFloat) -> Font {
         .custom("Besley-Bold", size: size)
     }
@@ -30,11 +36,8 @@ extension Font {
         .custom("Manrope-Bold", size: size)
     }
     
-    enum Size {
-        static let large: CGFloat = 48
-        static let small: CGFloat = 12
-    }
-    
-    static let splashTitle = Size.large
-    static let text = Size.small
+    static let splashTitle: CGFloat = 48
+    static let text: CGFloat = 12
+    static let label: CGFloat = 12
+    static let display: CGFloat = 14
 }
