@@ -22,7 +22,7 @@ struct NavBar: View {
                 HStack {
                     Spacer()
                     Circle()
-                        .fill(Color.Palette.green)
+                        .fill(Color.accent)
                         .frame(width: buttonSize, height: buttonSize)
                         .scaleEffect(logMenuOpened ? 7 : 1)
                     Spacer()
@@ -64,7 +64,7 @@ struct NavBar: View {
                 Text(title)
                     .font(Font.manropeBold(size: Font.text))
             }
-            .foregroundStyle(isSelected ? Color.Palette.green : Color.Palette.darkBrown.opacity(0.6))
+            .foregroundStyle(isSelected ? Color.accent : Color.textSecondary)
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
@@ -95,9 +95,9 @@ struct NavBar: View {
                 .animation(.linear(duration: 0.2), value: logMenuOpened)
                 .foregroundStyle(Color.surface)
                 .frame(width: buttonSize, height: buttonSize)
-                .background(Circle().fill(Color.Palette.green))
+                .background(Circle().fill(Color.accent))
                 .overlay(Circle().stroke(Color.surface, lineWidth: 4))
-                .shadow(color: .black.opacity(logMenuOpened ? 0 : 0.15), radius: 4, y: 2)
+                .shadow(color: Color.Palette.darkBrown.opacity(logMenuOpened ? 0 : 0.5), radius: 4, y: 2)
         }
         .frame(maxWidth: .infinity)
     }
