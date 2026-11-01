@@ -21,29 +21,51 @@ extension Color {
     static let border: Color = Palette.lightBrown.opacity(0.35)
 }
 
+struct CardModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(8)
+            .frame(maxWidth: .infinity)
+            .background {
+                RoundedRectangle(cornerRadius: Radius.card)
+                    .fill(Color.surface)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Radius.card)
+                            .stroke(Color.border, lineWidth: 1)
+                    )
+                    .appShadow()
+            }
+            .padding(.horizontal, 12)
+    }
+}
+
 extension View {
     func appShadow() -> some View {
         shadow(color: Color.Palette.darkBrown.opacity(0.1), radius: 8, y: 3)
     }
+    
+    func cardStyle() -> some View {
+        self.modifier(CardModifier())
+    }
 }
 
 extension Font {
-    static func besleyRegular(size: CGFloat) -> Font {
+    static func besleyRegular(_ size: CGFloat) -> Font {
         .custom("Besley-Regular", size: size)
     }
-    static func besleyMedium(size: CGFloat) -> Font {
+    static func besleyMedium(_ size: CGFloat) -> Font {
         .custom("Besley-Medium", size: size)
     }
-    static func besleyBold(size: CGFloat) -> Font {
+    static func besleyBold(_ size: CGFloat) -> Font {
         .custom("Besley-Bold", size: size)
     }
-    static func manropeRegular(size: CGFloat) -> Font {
+    static func manropeRegular(_ size: CGFloat) -> Font {
         .custom("Manrope-Regular", size: size)
     }
-    static func manropeMedium(size: CGFloat) -> Font {
+    static func manropeMedium(_ size: CGFloat) -> Font {
         .custom("Manrope-Medium", size: size)
     }
-    static func manropeBold(size: CGFloat) -> Font {
+    static func manropeBold(_ size: CGFloat) -> Font {
         .custom("Manrope-Bold", size: size)
     }
     

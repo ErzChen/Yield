@@ -2,31 +2,40 @@ import SwiftUI
 
 @main
 struct YieldApp: App {
-    @State private var currentTab: String = "Today"
+    @State private var location = LocationManager()
+    
     var body: some Scene {
         WindowGroup {
-            Spacer()
-            NavBar(currentTab: $currentTab)
+            RootView()
+                .environment(location)
         }
-        
     }
 }
 
 struct RootView: View {
+    @Environment(LocationManager.self) private var location
     @State private var currentTab = "Today"
+    let shared = Database.shared
 
     var body: some View {
-        Group() {
-            TodayTab()
+//        Group() {
+//            TodayTab()
+//        }
+//        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//        .background(Color.background)
+//        .safeAreaInset(edge: .bottom, spacing: 0) {
+//            NavBar(currentTab: $currentTab)
+//        }
+        Group {
+            MapScreen()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.background)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            NavBar(currentTab: $currentTab)
+        .task {
+            location.start()
         }
     }
 }
 
 #Preview {
     RootView()
+        .environment(LocationManager())
 }

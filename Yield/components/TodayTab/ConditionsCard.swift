@@ -24,137 +24,134 @@ private struct OpenMeteoResponse: Decodable {
 }
 
 struct ConditionsCard: View {
-    // Placeholder for testing
-    var coordinate: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 43.5448, longitude: -80.2482)
+    @Environment(LocationManager.self) private var location
+    
     
     @State private var conditions: Conditions?
     @State private var errorMessage: String?
     @State private var isLoading = true
     
     var body: some View {
-        Group {
-            if let conditions {
-                let trendSymbol: String = conditions.pressureTrend > 1
-                ? "arrow.up"
-                : (conditions.pressureTrend < -1
-                   ? "arrow.down"
-                   : "arrow.right"
-                )
-                let trendColor: Color = conditions.pressureTrend > 1
-                ? Color.Palette.green
-                : (conditions.pressureTrend < -1
-                   ? Color.Palette.red
-                   : Color.Palette.darkBrown.opacity(0.6)
-                )
-                
-                let moonIndex: Int = Int((conditions.moonPhase * 8).rounded()) % 8
-                let moonSymbol: String = [
-                    "moonphase.new.moon",
-                    "moonphase.waxing.crescent",
-                    "moonphase.first.quarter",
-                    "moonphase.waxing.gibbous",
-                    "moonphase.full.moon",
-                    "moonphase.waning.gibbous",
-                    "moonphase.last.quarter",
-                    "moonphase.waning.crescent"
-                ][moonIndex]
-                let moonDirection = [
-                    "New",
-                    "Waxing",
-                    "Waxing",
-                    "Waxing",
-                    "Full",
-                    "Waning",
-                    "Waning",
-                    "Waning"
-                ][moonIndex]
-                let moonName = [
-                    "Moon",
-                    "Crescent",
-                    "Quarter",
-                    "Gibbous",
-                    "Moon",
-                    "Gibbous",
-                    "Quarter",
-                    "Crescent"
-                ][moonIndex]
-                
-                HStack(alignment: .top, spacing: 8) {
-                    conditionsDisplay(
-                        symbol: "thermometer.medium",
-                        value: String(format: "%.0f° C", conditions.temperature),
-                        label: "Temp"
-                    )
-                    conditionsDisplay(
-                        symbol: "cloud.rain",
-                        value: String(format: "%.0f mm", conditions.rain72h),
-                        label: "Rain (3 days)"
-                    )
-                    conditionsDisplay(
-                        symbol: "gauge.with.dots.needle.33percent",
-                        value: String(format: "%.0f", conditions.pressure),
-                        label: "hPa",
-                        trendSymbol: trendSymbol,
-                        trendColor: trendColor
-                    )
-                    conditionsDisplay(
-                        symbol: moonSymbol,
-                        value: "\(moonDirection)\n\(moonName)",
-                        label: "Moon Phase",
-                    )
-                }
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(8)
-                .frame(maxWidth: .infinity)
-                .background {
-                    RoundedRectangle(cornerRadius: Radius.card)
-                        .fill(Color.surface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: Radius.card)
-                                .stroke(Color.border, lineWidth: 1)
-                        )
-                        .appShadow()
-                }
-                .padding(.horizontal, 12)
-            } else if isLoading {
-                // Add custom loading
-                ProgressView()
-                        .frame(maxWidth: .infinity, minHeight: 80)
-            } else {
-                VStack {
-                    Image(systemName: "icloud.slash")
-                        .font(.system(size: 28))
-                        .foregroundStyle(Color.textSecondary)
-                    Text(errorMessage == "" ? "Conditions unavailable" : errorMessage ?? "Conditions unavailable")
-                        .font(.manropeBold(size: 16))
-                        .foregroundStyle(Color.textSecondary)
-                }
-                .frame(maxWidth: .infinity, minHeight: 80)
-                .padding(8)
-                .frame(maxWidth: .infinity)
-                .background {
-                    RoundedRectangle(cornerRadius: Radius.card)
-                        .fill(Color.surface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: Radius.card)
-                                .stroke(Color.border, lineWidth: 1)
-                        )
-                        .appShadow()
-                }
-                .padding(.horizontal, 12)
+        content
+            .cardStyle()
+            .task(id: location.coordinate.map { "\($0.latitude),\($0.longitude)" } ?? "none") {
+                await loadWeatherData()
             }
-        }
-        .task {
-            await loadWeatherData()
+    }
+    
+    private var content: some View {
+        Group {
+            if location.status == .denied {
+                errorView("Location access is off. Enable it in Settings.")
+            } else if location.status == .restricted {
+                errorView("Location is restricted on this device.")
+            } else if let conditions {
+                loadedView(conditions)
+            } else if isLoading {
+                loadingView()
+            } else {
+                errorView(errorMessage ?? "Conditions unavailable")
+            }
         }
     }
     
+    private func loadingView() -> some View {
+        return ProgressView()
+            .frame(maxWidth: .infinity, minHeight: 80)
+    }
+    
+    private func errorView(_ message: String) -> some View {
+        return VStack(spacing: 6) {
+            Image(systemName: "icloud.slash")
+                .font(.system(size: 28))
+            Text(message)
+                .font(.manropeBold(16))
+                .multilineTextAlignment(.center)
+        }
+        .foregroundStyle(Color.textSecondary)
+        .frame(maxWidth: .infinity, minHeight: 80)
+    }
+    
+    private func loadedView(_ conditions: Conditions) -> some View {
+        let trendSymbol: String = conditions.pressureTrend > 1
+        ? "arrow.up"
+        : (conditions.pressureTrend < -1
+           ? "arrow.down"
+           : "arrow.right"
+        )
+        let trendColor: Color = conditions.pressureTrend > 1
+        ? Color.Palette.green
+        : (conditions.pressureTrend < -1
+           ? Color.Palette.red
+           : Color.Palette.darkBrown.opacity(0.6)
+        )
+        
+        let moonIndex: Int = Int((conditions.moonPhase * 8).rounded()) % 8
+        let moonSymbol: String = [
+            "moonphase.new.moon",
+            "moonphase.waxing.crescent",
+            "moonphase.first.quarter",
+            "moonphase.waxing.gibbous",
+            "moonphase.full.moon",
+            "moonphase.waning.gibbous",
+            "moonphase.last.quarter",
+            "moonphase.waning.crescent"
+        ][moonIndex]
+        let moonDirection = [
+            "New",
+            "Waxing",
+            "Waxing",
+            "Waxing",
+            "Full",
+            "Waning",
+            "Waning",
+            "Waning"
+        ][moonIndex]
+        let moonName = [
+            "Moon",
+            "Crescent",
+            "Quarter",
+            "Gibbous",
+            "Moon",
+            "Gibbous",
+            "Quarter",
+            "Crescent"
+        ][moonIndex]
+        
+        return HStack(alignment: .top, spacing: 8) {
+            conditionsDisplay(
+                "thermometer.medium",
+                String(format: "%.0f° C", conditions.temperature),
+                "Temp"
+            )
+            conditionsDisplay(
+                "cloud.rain",
+                String(format: "%.0f mm", conditions.rain72h),
+                "Rain (3 days)"
+            )
+            conditionsDisplay(
+                "gauge.with.dots.needle.33percent",
+                String(format: "%.0f", conditions.pressure),
+                "hPa",
+                trendSymbol,
+                trendColor
+            )
+            conditionsDisplay(
+                moonSymbol,
+                "\(moonDirection)\n\(moonName)",
+                "Moon Phase"
+            )
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+    
+    
     private func conditionsDisplay(
-        symbol: String,
-        value: String,
-        label: String,
-        trendSymbol: String? = nil,
-        trendColor: Color = Color.Palette.darkBrown,
+        _ symbol: String,
+        _ value: String,
+        _ label: String,
+        _ trendSymbol: String? = nil,
+        _ trendColor: Color = Color.Palette.darkBrown,
     ) -> some View {
         VStack(spacing: 6) {
             Image(systemName: symbol)
@@ -163,7 +160,7 @@ struct ConditionsCard: View {
                 .frame(height: 28)
             HStack(spacing: 0) {
                 Text(value)
-                    .font(.besleyBold(size: Font.display))
+                    .font(.besleyBold(Font.display))
                     .lineHeight(.normal)
                     .foregroundStyle(Color.Palette.darkBrown)
                     .lineLimit(2)
@@ -176,7 +173,7 @@ struct ConditionsCard: View {
             }
             .frame(minHeight: 32)
             Text(label)
-                .font(.manropeRegular(size: Font.label))
+                .font(.manropeRegular(Font.label))
                 .foregroundStyle(Color.textSecondary)
                 .lineLimit(1)
         }
@@ -193,18 +190,20 @@ struct ConditionsCard: View {
     }
 
     private func loadWeatherData() async {
+        guard let coordinate = location.coordinate else {
+            return
+        }
+        isLoading = true
         do {
-            isLoading = true
-            conditions = try await fetchConditions(coord: coordinate)
-            errorMessage = ""
-            isLoading = false
+            conditions = try await fetchConditions(coordinate)
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
-            isLoading = false
         }
+        isLoading = false
     }
 
-    private func fetchConditions(coord: CLLocationCoordinate2D) async throws -> Conditions {
+    private func fetchConditions(_ coord: CLLocationCoordinate2D) async throws -> Conditions {
         guard var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast") else {
             throw URLError(.badURL)
         }
@@ -232,10 +231,10 @@ struct ConditionsCard: View {
         let pressure = meteoResponse.hourly.pressure_msl
         let trend = (pressure[nowIndex] ?? meteoResponse.current.pressure_msl) - (pressure[nowIndex - 3] ?? meteoResponse.current.pressure_msl)
         
-        return Conditions(temperature: meteoResponse.current.temperature_2m, pressure: meteoResponse.current.pressure_msl, pressureTrend: trend, rain72h: rain, moonPhase: moonPhase(date: .now))
+        return Conditions(temperature: meteoResponse.current.temperature_2m, pressure: meteoResponse.current.pressure_msl, pressureTrend: trend, rain72h: rain, moonPhase: moonPhase(.now))
     }
 
-    private func moonPhase(date: Date) -> Double {
+    private func moonPhase(_ date: Date) -> Double {
         let reference = Date(timeIntervalSince1970: 947182440)
         let synodic = 29.530588853 * 86400
         let time = date.timeIntervalSince(reference).truncatingRemainder(dividingBy: synodic)

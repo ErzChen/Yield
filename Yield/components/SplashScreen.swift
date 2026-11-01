@@ -11,7 +11,7 @@ struct SplashScreen: View {
                     .scaledToFit()
                     .frame(width: 200, height: 200)
                 Text("Yield")
-                    .font(Font.besleyBold(size: Font.splashTitle))
+                    .font(Font.besleyBold(Font.splashTitle))
                     .foregroundStyle(Color.Palette.green)
                     
             }

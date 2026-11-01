@@ -9,11 +9,11 @@ struct NavBar: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 0) {
-            slot(tabSymbol: "calendar", tabTitle: "Today", actionSymbol: "square.and.pencil", actionTitle: "Entry")
-            slot(tabSymbol: "chart.xyaxis.line", tabTitle: "Insights", actionSymbol: "map", actionTitle: "Spots")
+            slot("calendar", "Today", "square.and.pencil", "Entry")
+            slot("chart.xyaxis.line", "Insights", "map", "Spots")
             logButton
-            slot(tabSymbol: "text.book.closed", tabTitle: "Library", actionSymbol: "camera", actionTitle: "Photo")
-            slot(tabSymbol: "person.crop.circle", tabTitle: "You", actionSymbol: "figure.walk", actionTitle: "Trip")
+            slot("text.book.closed", "Library", "camera", "Photo")
+            slot("person.crop.circle", "You", "figure.walk", "Trip")
         }
         .padding(.top, 8)
         .background {
@@ -34,9 +34,9 @@ struct NavBar: View {
         }
     }
 
-    private func slot(tabSymbol: String, tabTitle: String, actionSymbol: String, actionTitle: String) -> some View {
+    private func slot(_ tabSymbol: String, _ tabTitle: String, _ actionSymbol: String, _ actionTitle: String) -> some View {
         ZStack {
-            tabButton(symbol: tabSymbol, title: tabTitle)
+            tabButton(tabSymbol, tabTitle)
                 .opacity(logMenuOpened ? 0 : 1)
                 .allowsHitTesting(!logMenuOpened)
                 .animation(
@@ -44,14 +44,14 @@ struct NavBar: View {
                     value: logMenuOpened
                 )
 
-            menuButton(symbol: actionSymbol, title: actionTitle)
+            menuButton(actionSymbol, actionTitle)
                 .opacity(logItemsVisible ? 1 : 0)
                 .allowsHitTesting(logItemsVisible)
         }
         .frame(maxWidth: .infinity)
     }
 
-    private func tabButton(symbol: String, title: String) -> some View {
+    private func tabButton(_ symbol: String, _ title: String) -> some View {
         let isSelected = currentTab == title
         return Button {
             currentTab = title
@@ -62,7 +62,7 @@ struct NavBar: View {
                     .font(.system(size: 22))
                     .frame(height: 28)
                 Text(title)
-                    .font(Font.manropeBold(size: Font.text))
+                    .font(Font.manropeBold(Font.text))
             }
             .foregroundStyle(isSelected ? Color.accent : Color.textSecondary)
             .frame(maxWidth: .infinity)
@@ -70,7 +70,7 @@ struct NavBar: View {
         }
     }
 
-    private func menuButton(symbol: String, title: String) -> some View {
+    private func menuButton(_ symbol: String, _ title: String) -> some View {
         Button {
             toggleLogMenu()
         } label: {
@@ -79,7 +79,7 @@ struct NavBar: View {
                     .font(.system(size: 22))
                     .frame(height: 28)
                 Text(title)
-                    .font(Font.manropeBold(size: Font.text))
+                    .font(Font.manropeBold(Font.text))
             }
             .foregroundStyle(Color.surface)
             .frame(maxWidth: .infinity)
