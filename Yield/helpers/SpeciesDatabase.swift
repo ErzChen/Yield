@@ -14,8 +14,8 @@ func seasonWeek(_ date: Date) -> Int {
 }
 
 // Setup
-final class Database {
-    static let shared = Database()
+final class SpeciesDatabase {
+    static let shared = SpeciesDatabase()
     
     private let queue: DatabaseQueue?
     
@@ -42,7 +42,7 @@ struct LikelySpecies: Identifiable, FetchableRecord, Decodable {
 }
  
 // Today Tab
-extension Database {
+extension SpeciesDatabase {
     func fetchLikely(_ coordinate: CLLocationCoordinate2D, _ date: Date, _
                      minObs: Int = 5) async -> [LikelySpecies] {
         guard let queue = queue else {
@@ -70,7 +70,7 @@ extension Database {
                 """, arguments: [targetCell, targetWeek, minObs])
             }
         } catch {
-            print("Database read error: \(error)")
+            print("Database read error:", error)
             return []
         }
         

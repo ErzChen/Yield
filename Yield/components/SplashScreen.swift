@@ -12,7 +12,7 @@ struct SplashScreen: View {
                     .frame(width: 200, height: 200)
                 Text("Yield")
                     .font(Font.besleyBold(Font.splashTitle))
-                    .foregroundStyle(Color.Palette.green)
+                    .foregroundStyle(Color.accent)
                     
             }
         }

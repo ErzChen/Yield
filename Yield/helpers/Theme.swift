@@ -15,27 +15,27 @@ extension Color {
     
     static let background: Color = Palette.tan
     static let surface: Color = Palette.beige
+    static let surfaceAccent: Color = Palette.brown.opacity(0.6)
     static let textPrimary: Color = Palette.darkBrown
     static let textSecondary: Color = Palette.darkBrown.opacity(0.6)
-    static let accent: Color = Palette.green
+    static let accent: Color = Palette.darkGreen
     static let border: Color = Palette.lightBrown.opacity(0.35)
+    static let success: Color = Palette.green
+    static let failure: Color = Palette.red
 }
 
 struct CardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .padding(8)
+            .padding(Size.smallPadding)
             .frame(maxWidth: .infinity)
             .background {
                 RoundedRectangle(cornerRadius: Radius.card)
                     .fill(Color.surface)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Radius.card)
-                            .stroke(Color.border, lineWidth: 1)
-                    )
+                    .strokeBorder(Color.border, lineWidth: 1)
                     .appShadow()
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, Size.regPadding)
     }
 }
 
@@ -70,12 +70,27 @@ extension Font {
     }
     
     static let splashTitle: CGFloat = 48
-    static let text: CGFloat = 12
-    static let label: CGFloat = 12
-    static let display: CGFloat = 14
+    static let spotTitle: CGFloat = 24
+    static let spotText: CGFloat = 16
+    static let navText: CGFloat = 12
+    static let conditionsLabel: CGFloat = 12
+    static let conditionsValue: CGFloat = 14
+}
+
+enum Size {
+    static let navButtonSize: CGFloat = 64
+    static let mapPinSize: CGFloat = 14
+    static let mapNavButtonSize: CGFloat = 24
+    
+    static let smallPadding: CGFloat = 8
+    static let regPadding: CGFloat = 12
+    static let largePadding: CGFloat = 20
+    
+    static let navButtonSpacing: CGFloat = 4
+    static let smallSpacing: CGFloat = 6
 }
 
 enum Radius {
-    static let card: CGFloat = 20;
-    static let tile: CGFloat = 12;
+    static let card: CGFloat = 20
+    static let tile: CGFloat = 12
 }

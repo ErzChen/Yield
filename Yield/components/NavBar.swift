@@ -2,10 +2,9 @@ import SwiftUI
 
 struct NavBar: View {
     @Binding var currentTab: String
+    let onAction: (String) -> Void
     @State private var logMenuOpened = false
     @State private var logItemsVisible = false
-
-    private let buttonSize: CGFloat = 64
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 0) {
@@ -15,7 +14,7 @@ struct NavBar: View {
             slot("text.book.closed", "Library", "camera", "Photo")
             slot("person.crop.circle", "You", "figure.walk", "Trip")
         }
-        .padding(.top, 8)
+        .padding(.top, Size.smallPadding)
         .background {
             ZStack(alignment: .topLeading) {
                 Color.surface
@@ -23,11 +22,11 @@ struct NavBar: View {
                     Spacer()
                     Circle()
                         .fill(Color.accent)
-                        .frame(width: buttonSize, height: buttonSize)
+                        .frame(width: Size.navButtonSize, height: Size.navButtonSize)
                         .scaleEffect(logMenuOpened ? 7 : 1)
                     Spacer()
                 }
-                .padding(.top, 8)
+                .padding(.top, Size.smallPadding)
             }
             .clipped()
             .ignoresSafeArea(edges: .bottom)
@@ -56,13 +55,13 @@ struct NavBar: View {
         return Button {
             currentTab = title
         } label: {
-            VStack(spacing: 4) {
+            VStack(spacing: Size.navButtonSpacing) {
                 Image(systemName: symbol)
                     .symbolVariant(isSelected ? .fill : .none)
                     .font(.system(size: 22))
                     .frame(height: 28)
                 Text(title)
-                    .font(Font.manropeBold(Font.text))
+                    .font(Font.manropeBold(Font.navText))
             }
             .foregroundStyle(isSelected ? Color.accent : Color.textSecondary)
             .frame(maxWidth: .infinity)
@@ -73,13 +72,15 @@ struct NavBar: View {
     private func menuButton(_ symbol: String, _ title: String) -> some View {
         Button {
             toggleLogMenu()
+            onAction(title)
         } label: {
-            VStack(spacing: 4) {
+            VStack(spacing: Size.navButtonSpacing
+            ) {
                 Image(systemName: symbol)
                     .font(.system(size: 22))
                     .frame(height: 28)
                 Text(title)
-                    .font(Font.manropeBold(Font.text))
+                    .font(Font.manropeBold(Font.navText))
             }
             .foregroundStyle(Color.surface)
             .frame(maxWidth: .infinity)
@@ -88,16 +89,17 @@ struct NavBar: View {
     }
 
     private var logButton: some View {
-        Button(action: toggleLogMenu) {
+        Button {
+            toggleLogMenu()
+        } label: {
             Image(systemName: "plus")
                 .font(.system(size: 26, weight: .semibold))
                 .rotationEffect(.degrees(logMenuOpened ? 135 : 0))
                 .animation(.linear(duration: 0.2), value: logMenuOpened)
                 .foregroundStyle(Color.surface)
-                .frame(width: buttonSize, height: buttonSize)
-                .background(Circle().fill(Color.accent))
-                .overlay(Circle().stroke(Color.surface, lineWidth: 4))
-                .shadow(color: Color.Palette.darkBrown.opacity(logMenuOpened ? 0 : 0.5), radius: 4, y: 2)
+                .frame(width: Size.navButtonSize, height: Size.navButtonSize)
+                .background(Circle().fill(Color.accent).strokeBorder(Color.surface, lineWidth: 4))
+                .shadow(color: logMenuOpened ? Color.textSecondary : Color.clear, radius: 4, y: 2)
         }
         .frame(maxWidth: .infinity)
     }
@@ -117,7 +119,7 @@ struct NavBar: View {
     @Previewable @State var selectedTab: String = "Today"
     VStack {
         Spacer()
-        NavBar(currentTab: $selectedTab)
+        NavBar(currentTab: $selectedTab, onAction: { _ in })
     }
     .background(Color.background)
 }

@@ -61,7 +61,7 @@ struct ConditionsCard: View {
     }
     
     private func errorView(_ message: String) -> some View {
-        return VStack(spacing: 6) {
+        return VStack(spacing: Size.smallSpacing) {
             Image(systemName: "icloud.slash")
                 .font(.system(size: 28))
             Text(message)
@@ -80,10 +80,10 @@ struct ConditionsCard: View {
            : "arrow.right"
         )
         let trendColor: Color = conditions.pressureTrend > 1
-        ? Color.Palette.green
+        ? Color.success
         : (conditions.pressureTrend < -1
-           ? Color.Palette.red
-           : Color.Palette.darkBrown.opacity(0.6)
+           ? Color.failure
+           : Color.textSecondary
         )
         
         let moonIndex: Int = Int((conditions.moonPhase * 8).rounded()) % 8
@@ -118,7 +118,7 @@ struct ConditionsCard: View {
             "Crescent"
         ][moonIndex]
         
-        return HStack(alignment: .top, spacing: 8) {
+        return HStack(alignment: .top, spacing: Size.smallSpacing) {
             conditionsDisplay(
                 "thermometer.medium",
                 String(format: "%.0f° C", conditions.temperature),
@@ -151,18 +151,18 @@ struct ConditionsCard: View {
         _ value: String,
         _ label: String,
         _ trendSymbol: String? = nil,
-        _ trendColor: Color = Color.Palette.darkBrown,
+        _ trendColor: Color = Color.textSecondary,
     ) -> some View {
-        VStack(spacing: 6) {
+        VStack(spacing: Size.smallSpacing) {
             Image(systemName: symbol)
                 .font(.system(size: 24))
                 .foregroundStyle(Color.accent)
                 .frame(height: 28)
             HStack(spacing: 0) {
                 Text(value)
-                    .font(.besleyBold(Font.display))
+                    .font(.besleyBold(Font.conditionsValue))
                     .lineHeight(.normal)
-                    .foregroundStyle(Color.Palette.darkBrown)
+                    .foregroundStyle(Color.textPrimary)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                 if let trendSymbol {
@@ -173,19 +173,16 @@ struct ConditionsCard: View {
             }
             .frame(minHeight: 32)
             Text(label)
-                .font(.manropeRegular(Font.label))
+                .font(.manropeRegular(Font.conditionsLabel))
                 .foregroundStyle(Color.textSecondary)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .padding(6)
+        .padding(Size.smallPadding)
         .background {
             RoundedRectangle(cornerRadius: Radius.tile, style: .continuous)
                 .fill(Color.background.opacity(0.55))
-                .overlay(
-                    RoundedRectangle(cornerRadius: Radius.tile, style: .continuous)
-                        .stroke(Color.Palette.lightBrown.opacity(0.25), lineWidth: 1)
-                )
+                .strokeBorder(Color.border, lineWidth: 1)
         }
     }
 
