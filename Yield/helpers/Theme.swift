@@ -69,22 +69,53 @@ extension Font {
         .custom("Manrope-Bold", size: size)
     }
     
+    // Splash Screen
     static let splashTitle: CGFloat = 48
+    
+    // Nav Bar
+    static let navText: CGFloat = 12
+    
+    // Map Tab
     static let spotTitle: CGFloat = 24
     static let spotText: CGFloat = 16
-    static let navText: CGFloat = 12
+    
+    // Today Tab
     static let conditionsLabel: CGFloat = 12
     static let conditionsValue: CGFloat = 14
+    
+    // Library Tab
+    static let searchCommon: CGFloat = 12
+    static let searchSci: CGFloat = 10
+    static let domainName: CGFloat = 24
+    static let domainSubtitle: CGFloat = 12
+    static let libraryTitle: CGFloat = 18
+    static let imageAttribution: CGFloat = 10
+    static let detailTitle: CGFloat = 28
+    static let chartTitle: CGFloat = 18
+    static let chartSubtitle: CGFloat = 14
+    static let chartLabel: CGFloat = 10
 }
 
 enum Size {
-    static let navButtonSize: CGFloat = 64
-    static let mapPinSize: CGFloat = 14
-    static let mapNavButtonSize: CGFloat = 24
+    // Tool Bar
+    static let dismissIcon: CGFloat = 16
+    
+    // Nav Bar
+    static let navButton: CGFloat = 64
+    
+    // Map Tab
+    static let mapPin: CGFloat = 14
+    static let mapNavButton: CGFloat = 24
+    
+    // Library Tab
+    static let domainHeight: CGFloat = 180
+    static let detailImage: CGFloat = 260
+    static let chart: CGFloat = 100
     
     static let smallPadding: CGFloat = 8
     static let regPadding: CGFloat = 12
     static let largePadding: CGFloat = 20
+    static let domainPadding: CGFloat = 40
     
     static let navButtonSpacing: CGFloat = 4
     static let smallSpacing: CGFloat = 6

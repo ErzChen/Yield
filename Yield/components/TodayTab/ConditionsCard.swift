@@ -180,7 +180,7 @@ struct ConditionsCard: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .padding(Size.smallPadding)
         .background {
-            RoundedRectangle(cornerRadius: Radius.tile, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.tile)
                 .fill(Color.background.opacity(0.55))
                 .strokeBorder(Color.border, lineWidth: 1)
         }

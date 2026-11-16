@@ -22,7 +22,7 @@ struct NavBar: View {
                     Spacer()
                     Circle()
                         .fill(Color.accent)
-                        .frame(width: Size.navButtonSize, height: Size.navButtonSize)
+                        .frame(width: Size.navButton, height: Size.navButton)
                         .scaleEffect(logMenuOpened ? 7 : 1)
                     Spacer()
                 }
@@ -97,7 +97,7 @@ struct NavBar: View {
                 .rotationEffect(.degrees(logMenuOpened ? 135 : 0))
                 .animation(.linear(duration: 0.2), value: logMenuOpened)
                 .foregroundStyle(Color.surface)
-                .frame(width: Size.navButtonSize, height: Size.navButtonSize)
+                .frame(width: Size.navButton, height: Size.navButton)
                 .background(Circle().fill(Color.accent).strokeBorder(Color.surface, lineWidth: 4))
                 .shadow(color: logMenuOpened ? Color.textSecondary : Color.clear, radius: 4, y: 2)
         }

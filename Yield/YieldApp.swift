@@ -18,30 +18,31 @@ struct RootView: View {
     @Environment(LocationManager.self) private var location
     @Environment(SpotStore.self) private var spots
     
-    @State private var currentTab = "Today"
-    
-    let speciesDb = SpeciesDatabase.shared
+    @State private var currentTab = "Library"
 
     var body: some View {
-        Group() {
-            switch currentTab {
-            case "Today": TodayTab()
-            case "Spots": MapTab()
-            default: TodayTab()
+        VStack(spacing: 0) {
+            Group {
+                switch currentTab {
+                case "Today": TodayTab()
+                case "Library": LibraryTab()
+                case "Spots": MapTab()
+                default: TodayTab()
+                }
             }
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            NavBar(currentTab: $currentTab, onAction: { name in
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            NavBar(currentTab: $currentTab, onAction: {
+                _ in
+                
                 currentTab = "Spots"
             })
         }
+        .background(Color.background)
         .task {
             location.start()
             await spots.load()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.background)
-        
     }
 }
 

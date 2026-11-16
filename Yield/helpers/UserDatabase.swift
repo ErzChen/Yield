@@ -20,8 +20,12 @@ final class UserDatabase {
         #if DEBUG
         migrator.eraseDatabaseOnSchemaChange = true
         #endif
-        migrator.registerMigration("v1") { db in
-            try db.create(table: "spot") { table in
+        migrator.registerMigration("v1") {
+            db in
+            
+            try db.create(table: "spot") {
+                table in
+                
                 table.autoIncrementedPrimaryKey("id")
                 table.column("name", .text).notNull()
                 table.column("latitude", .double).notNull()
@@ -37,7 +41,9 @@ final class UserDatabase {
 extension UserDatabase {
     func fetchSpots() async throws -> [Spot] {
         return try await queue.read {
-            db in try Spot.fetchAll(db)
+            db in
+            
+            try Spot.fetchAll(db)
         }
     }
     
@@ -45,7 +51,9 @@ extension UserDatabase {
         _ name: String,
         _ coordinate: CLLocationCoordinate2D
     ) async throws -> Spot {
-        try await queue.write { db in
+        try await queue.write {
+            db in
+            
             var spot = Spot(
                 id: nil,
                 name: name,
