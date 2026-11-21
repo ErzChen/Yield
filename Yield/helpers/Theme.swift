@@ -17,7 +17,7 @@ extension Color {
     static let surface: Color = Palette.beige
     static let surfaceAccent: Color = Palette.brown.opacity(0.6)
     static let textPrimary: Color = Palette.darkBrown
-    static let textSecondary: Color = Palette.darkBrown.opacity(0.6)
+    static let textSecondary: Color = Palette.darkBrown.opacity(0.78)
     static let accent: Color = Palette.darkGreen
     static let border: Color = Palette.lightBrown.opacity(0.35)
     static let success: Color = Palette.green
@@ -27,15 +27,14 @@ extension Color {
 struct CardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .padding(Size.smallPadding)
+            .padding(Size.pagePadding)
             .frame(maxWidth: .infinity)
             .background {
                 RoundedRectangle(cornerRadius: Radius.card)
                     .fill(Color.surface)
                     .strokeBorder(Color.border, lineWidth: 1)
-                    .appShadow()
             }
-            .padding(.horizontal, Size.regPadding)
+            .padding(.horizontal, Size.pagePadding)
     }
 }
 
@@ -85,40 +84,53 @@ extension Font {
     
     // Library Tab
     static let searchCommon: CGFloat = 12
-    static let searchSci: CGFloat = 10
+    static let searchSci: CGFloat = 11
     static let domainName: CGFloat = 24
     static let domainSubtitle: CGFloat = 12
     static let libraryTitle: CGFloat = 18
-    static let imageAttribution: CGFloat = 10
+    static let imageAttribution: CGFloat = 11
     static let detailTitle: CGFloat = 28
     static let chartTitle: CGFloat = 18
     static let chartSubtitle: CGFloat = 14
-    static let chartLabel: CGFloat = 10
+    static let chartLabel: CGFloat = 11
+    static let infoTitle: CGFloat = 18
+    static let infoText: CGFloat = 16
+    static let edibilityTitle: CGFloat = 20
+    static let lookalikeName: CGFloat = 16
+    static let lookalikeSci: CGFloat = 12
+    static let errorText: CGFloat = 16
 }
 
 enum Size {
-    // Tool Bar
-    static let dismissIcon: CGFloat = 16
+    // Icons
+    static let iconInline: CGFloat = 16
+    static let iconNav: CGFloat = 22
+    static let iconFeature: CGFloat = 24
+    static let tapTarget: CGFloat = 44
     
     // Nav Bar
     static let navButton: CGFloat = 64
     
-    // Map Tab
-    static let mapPin: CGFloat = 14
-    static let mapNavButton: CGFloat = 24
-    
     // Library Tab
     static let domainHeight: CGFloat = 180
     static let detailImage: CGFloat = 260
-    static let chart: CGFloat = 100
+    static let chart: CGFloat = 140
+    static let lookalikeThumb: CGFloat = 72
     
     static let smallPadding: CGFloat = 8
     static let regPadding: CGFloat = 12
+    static let pagePadding: CGFloat = 16
     static let largePadding: CGFloat = 20
     static let domainPadding: CGFloat = 40
     
     static let navButtonSpacing: CGFloat = 4
-    static let smallSpacing: CGFloat = 6
+    static let smallSpacing: CGFloat = 8
+}
+
+enum Motion {
+    static let spring = Animation.spring(duration: 0.4, bounce: 0)
+    static let fastFade = Animation.easeOut(duration: 0.15)
+    static let fade = Animation.easeOut(duration: 0.2)
 }
 
 enum Radius {

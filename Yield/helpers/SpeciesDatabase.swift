@@ -8,6 +8,12 @@ func cellId(_ coord: CLLocationCoordinate2D) -> String {
     return "\(y)_\(x)"
 }
 
+func currentWeek(_ date: Date = .now) -> Int {
+    var calendar = Calendar(identifier: .iso8601)
+    calendar.timeZone = .current
+    return min(max(calendar.component(.weekOfYear, from: date), 1), 52)
+}
+
 // Setup
 final class SpeciesDatabase {
     static let shared = SpeciesDatabase()
@@ -46,7 +52,7 @@ extension SpeciesDatabase {
         }
         
         let targetCell = cellId(coordinate)
-        let targetWeek = Calendar.current.component(.weekOfYear, from: date)
+        let targetWeek = currentWeek(date)
         
         do {
             return try await queue.read {
@@ -77,7 +83,6 @@ extension SpeciesDatabase {
 }
 
 // Library Tab
-
 struct SpeciesSummary: Identifiable, FetchableRecord, Decodable, Hashable {
     let id: Int
     let common_name: String
@@ -93,16 +98,62 @@ struct SpeciesImage: Identifiable, FetchableRecord, Decodable {
     let license: String?
 }
 
-struct Edibility {
+enum EdibilityCategory: String {
+    case edible = "Edible"
+    case edibleWithPrep = "Edible with preparation"
+    case notRecommended = "Not recommended"
+    case toxic = "Toxic"
+    case deadly = "Deadly"
+
+    var color: Color {
+        switch self {
+        case .edible:
+            return Color.success
+        case .edibleWithPrep, .notRecommended:
+            return Color.Palette.brown
+        case .toxic, .deadly:
+            return Color.failure
+        }
+    }
     
+    var symbol: String {
+        switch self {
+        case .edible: return "fork.knife"
+        case .edibleWithPrep: return "frying.pan.fill"
+        case .notRecommended: return "exclamationmark.circle.fill"
+        case .toxic: return "exclamationmark.triangle.fill"
+        case .deadly: return "xmark.octagon.fill"
+        }
+    }
 }
 
-struct SpeciesInfo: FetchableRecord, Decodable {
+struct Edibility {
+    let category: EdibilityCategory
+    let sentence: String
+}
+
+struct Lookalike: Identifiable {
+    let id = UUID()
+    let isDangerous: Bool
+    let commonName: String
+    let sciName: String
+    var summary: SpeciesSummary?
+}
+
+struct CuratedRow: FetchableRecord, Decodable {
     let description: String?
     let habitat: String?
     let lookalikes: String?
     let edibility: String?
     let is_invasive: Bool?
+}
+
+struct SpeciesInfo {
+    let description: String?
+    let habitat: String?
+    let lookalikes: [Lookalike]
+    let edibility: Edibility?
+    let isInvasive: Bool?
 }
 
 struct WeekLevel: Identifiable, FetchableRecord, Decodable {
@@ -220,15 +271,101 @@ extension SpeciesDatabase {
             return nil
         }
         do {
-            return try await queue.read {
+            let row = try await queue.read {
                 db in
                 
-                try SpeciesInfo.fetchOne(db, sql: """
-                        SELECT description, habitat, lookalikes, edibility, is_invasive
-                        FROM curated 
-                        WHERE species_id = ?
-                    """, arguments: [speciesId])
+                try CuratedRow.fetchOne(db, sql: """
+                    SELECT description, habitat, lookalikes, edibility, is_invasive
+                    FROM curated 
+                    WHERE species_id = ?
+                """, arguments: [speciesId])
             }
+            
+            guard let row else {
+                return nil
+            }
+            
+            var lookalikes: [Lookalike] = []
+            
+            if let text = row.lookalikes {
+                for raw in text.components(separatedBy: "; ") {
+                    var entry = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if entry.isEmpty {
+                        continue
+                    }
+
+                    var isDangerous = false
+                    if entry.hasPrefix("DANGEROUS - ") {
+                        isDangerous = true
+                        entry = String(entry.dropFirst("DANGEROUS - ".count))
+                    }
+
+                    if let opening = entry.firstIndex(of: "("),
+                       let closing = entry[opening...].firstIndex(of: ")") {
+                        lookalikes.append(Lookalike(
+                            isDangerous: isDangerous,
+                            commonName: entry[..<opening].trimmingCharacters(in: .whitespaces),
+                            sciName: String(entry[entry.index(after: opening)..<closing]),
+                            summary: nil
+                        ))
+                    }
+                }
+
+                let sciNames = lookalikes.map(\.sciName).filter { !$0.isEmpty }
+
+                if !sciNames.isEmpty {
+                    let matches = (
+                        try? await queue.read {
+                            db in
+                            
+                            try SpeciesSummary.fetchAll(db, sql: """
+                                SELECT s.id, s.common_name, s.sci_name, s.domain, i.url
+                                FROM species s
+                                LEFT JOIN species_image i ON i.species_id = s.id AND i.position = 0
+                                WHERE s.sci_name COLLATE NOCASE IN (\(databaseQuestionMarks(count: sciNames.count)))
+                            """, arguments: StatementArguments(sciNames))
+                        }
+                    ) ?? []
+
+                    let summaryByName = Dictionary(
+                        matches.map {
+                            ($0.sci_name.lowercased(), $0)
+                        },
+                        uniquingKeysWith: {
+                            first, _ in first
+                        }
+                    )
+
+                    for index in lookalikes.indices {
+                        lookalikes[index].summary = summaryByName[lookalikes[index].sciName.lowercased()]
+                    }
+                }
+            }
+            
+            var edibility: Edibility?
+            
+            if let text = row.edibility {
+                let parts = text.split(separator: "|", maxSplits: 1)
+                    .map {
+                        $0.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                
+                // A bad edibility string must not throw away the lookalikes and the rest
+                // of the row. Leave edibility nil; the UI then shows "Not written yet"
+                // plus the "never assume it's safe" warning.
+                if parts.count == 2, let category = EdibilityCategory(rawValue: parts[0]) {
+                    edibility = Edibility(category: category, sentence: parts[1])
+                } else {
+                    print("Malformed edibility for species \(speciesId):", text)
+                }
+            }
+            
+            return SpeciesInfo(
+                description: row.description,
+                habitat: row.habitat,
+                lookalikes: lookalikes, edibility: edibility,
+                isInvasive: row.is_invasive
+            )
         } catch {
             print("Info fetch error:", error)
             return nil
@@ -274,7 +411,7 @@ extension SpeciesDatabase {
                     return best
                 }
             } catch {
-                print("seasonCurve error:", error)
+                print("Curve fetch error:", error)
                 return best
             }
         }

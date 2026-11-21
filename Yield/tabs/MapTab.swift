@@ -22,24 +22,16 @@ struct MapTab: View {
                             selectedSpot = spot
                         }
                     } label: {
-                        Image(systemName: "mappin")
-                            .font(.system(size: Size.mapPin, weight: .semibold))
-                            .foregroundStyle(Color.surface)
-                            .padding(Size.smallPadding)
-                            .background(Circle().fill(Color.accent).strokeBorder(Color.surface, lineWidth: 2))
-                            .appShadow()
+                        Pin
+                            .frame(width: Size.tapTarget, height: Size.tapTarget)
+                            .contentShape(Rectangle())
                     }
                 
                 }
             }
             if let pending = pendingCoordinate {
                 Annotation("New spot", coordinate: pending) {
-                    Image(systemName: "mappin")
-                        .font(.system(size: Size.mapPin, weight: .semibold))
-                        .foregroundStyle(Color.surface)
-                        .padding(Size.smallPadding)
-                        .background(Circle().fill(Color.accent).strokeBorder(Color.surface, lineWidth: 2))
-                        .appShadow()
+                    Pin
                 }
             }
         }
@@ -54,7 +46,7 @@ struct MapTab: View {
             if let spot = selectedSpot {
                 SpotModal(spot: spot, onClose: closeSpot)
                     .id(spot.id)
-                    .padding(Size.regPadding)
+                    .padding(Size.pagePadding)
                     .transition(.move(edge: .bottom))
             } else if pendingCoordinate != nil {
                 SaveSpotModal(
@@ -66,14 +58,14 @@ struct MapTab: View {
                     },
                     onCancel: cancelPending
                 )
-                .padding(Size.regPadding)
+                .padding(Size.pagePadding)
                 .transition(.move(edge: .bottom))
             } else {
                 HStack(alignment: .bottom) {
                     Spacer()
                     Button(action: startPending) {
                         Image(systemName: "mappin")
-                            .font(.system(size: Size.mapNavButton, weight: .semibold))
+                            .font(.system(size: Size.iconFeature, weight: .semibold))
                             .foregroundStyle(Color.surface)
                             .padding(Size.regPadding)
                             .background(Circle().fill(Color.accent).strokeBorder(Color.surface, lineWidth: 2))
@@ -85,8 +77,19 @@ struct MapTab: View {
         }
     }
     
+    private var Pin: some View {
+        Image(systemName: "mappin")
+            .font(.system(size: Size.iconInline))
+            .foregroundStyle(Color.surface)
+            .padding(Size.smallPadding)
+            .background(Circle().fill(Color.accent).strokeBorder(Color.surface, lineWidth: 2))
+            .appShadow()
+    }
+    
     private func startPending() {
-        guard let coordinate = location.coordinate else { return }
+        guard let coordinate = location.coordinate else {
+            return
+        }
         newName = ""
         withAnimation(.spring(duration: 0.35)) {
             pendingCoordinate = coordinate
@@ -107,7 +110,9 @@ struct MapTab: View {
     }
 
     private func saveSpot() async {
-        guard let coordinate = pendingCoordinate else { return }
+        guard let coordinate = pendingCoordinate else {
+            return
+        }
 
         let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
         let name = trimmed.isEmpty ? "Unnamed spot" : trimmed

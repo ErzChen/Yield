@@ -23,6 +23,14 @@ private struct OpenMeteoResponse: Decodable {
     let hourly: Hourly
 }
 
+private struct ConditionTile: Identifiable {
+    let id: String
+    let symbol: String
+    let value: String
+    let label: String
+    var trendSymbol: String? = nil
+}
+
 struct ConditionsCard: View {
     @Environment(LocationManager.self) private var location
     
@@ -42,9 +50,9 @@ struct ConditionsCard: View {
     private var content: some View {
         Group {
             if location.status == .denied {
-                errorView("Location access is off. Enable it in Settings.")
+                errorView("Location access is off. Enable it in Settings")
             } else if location.status == .restricted {
-                errorView("Location is restricted on this device.")
+                errorView("Location is restricted on this device")
             } else if let conditions {
                 loadedView(conditions)
             } else if isLoading {
@@ -63,9 +71,9 @@ struct ConditionsCard: View {
     private func errorView(_ message: String) -> some View {
         return VStack(spacing: Size.smallSpacing) {
             Image(systemName: "icloud.slash")
-                .font(.system(size: 28))
+                .font(.system(size: Size.iconFeature))
             Text(message)
-                .font(.manropeBold(16))
+                .font(.manropeMedium(Font.errorText))
                 .multilineTextAlignment(.center)
         }
         .foregroundStyle(Color.textSecondary)
@@ -74,17 +82,11 @@ struct ConditionsCard: View {
     
     private func loadedView(_ conditions: Conditions) -> some View {
         let trendSymbol: String = conditions.pressureTrend > 1
-        ? "arrow.up"
-        : (conditions.pressureTrend < -1
-           ? "arrow.down"
-           : "arrow.right"
-        )
-        let trendColor: Color = conditions.pressureTrend > 1
-        ? Color.success
-        : (conditions.pressureTrend < -1
-           ? Color.failure
-           : Color.textSecondary
-        )
+            ? "arrow.up"
+            : (conditions.pressureTrend < -1
+               ? "arrow.down"
+               : "arrow.right"
+            )
         
         let moonIndex: Int = Int((conditions.moonPhase * 8).rounded()) % 8
         let moonSymbol: String = [
@@ -118,72 +120,74 @@ struct ConditionsCard: View {
             "Crescent"
         ][moonIndex]
         
+        let tiles: [ConditionTile] = [
+            ConditionTile(
+                id: "temp",
+                symbol: "thermometer.medium",
+                value: String(format: "%.0f°C", conditions.temperature),
+                label: "Temp"
+            ),
+            ConditionTile(
+                id: "rain",
+                symbol: "cloud.rain",
+                value: String(format: "%.0f mm", conditions.rain72h),
+                label: "3-day rain"
+            ),
+            ConditionTile(
+                id: "pressure",
+                symbol: "gauge.with.dots.needle.33percent",
+                value: String(format: "%.0f\nhPa", conditions.pressure),
+                label: "Pressure",
+                trendSymbol: trendSymbol
+            ),
+            ConditionTile(
+                id: "moon",
+                symbol: moonSymbol,
+                value: "\(moonDirection)\n\(moonName)",
+                label: "Moon"
+            )
+        ]
+        
         return HStack(alignment: .top, spacing: Size.smallSpacing) {
-            conditionsDisplay(
-                "thermometer.medium",
-                String(format: "%.0f° C", conditions.temperature),
-                "Temp"
-            )
-            conditionsDisplay(
-                "cloud.rain",
-                String(format: "%.0f mm", conditions.rain72h),
-                "Rain (3 days)"
-            )
-            conditionsDisplay(
-                "gauge.with.dots.needle.33percent",
-                String(format: "%.0f", conditions.pressure),
-                "hPa",
-                trendSymbol,
-                trendColor
-            )
-            conditionsDisplay(
-                moonSymbol,
-                "\(moonDirection)\n\(moonName)",
-                "Moon Phase"
-            )
+            ForEach(tiles) {
+                tile in
+                
+                conditionsDisplay(tile)
+            }
         }
         .fixedSize(horizontal: false, vertical: true)
     }
     
-    
-    private func conditionsDisplay(
-        _ symbol: String,
-        _ value: String,
-        _ label: String,
-        _ trendSymbol: String? = nil,
-        _ trendColor: Color = Color.textSecondary,
-    ) -> some View {
+    private func conditionsDisplay(_ tile: ConditionTile) -> some View {
         VStack(spacing: Size.smallSpacing) {
-            Image(systemName: symbol)
-                .font(.system(size: 24))
+            Image(systemName: tile.symbol)
+                .font(.system(size: Size.iconFeature))
                 .foregroundStyle(Color.accent)
                 .frame(height: 28)
             HStack(spacing: 0) {
-                Text(value)
-                    .font(.besleyBold(Font.conditionsValue))
+                Text(tile.value)
+                    .font(.besleyMedium(Font.conditionsValue))
+                    .monospacedDigit()
+                    .multilineTextAlignment(.center)
                     .lineHeight(.normal)
                     .foregroundStyle(Color.textPrimary)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
-                if let trendSymbol {
+                if let trendSymbol = tile.trendSymbol {
                     Image(systemName: trendSymbol)
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(trendColor)
+                        .font(.system(size: Size.iconInline))
+                        .foregroundStyle(Color.textSecondary)
                 }
             }
             .frame(minHeight: 32)
-            Text(label)
+            Text(tile.label)
                 .font(.manropeRegular(Font.conditionsLabel))
                 .foregroundStyle(Color.textSecondary)
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .padding(Size.smallPadding)
-        .background {
-            RoundedRectangle(cornerRadius: Radius.tile)
-                .fill(Color.background.opacity(0.55))
-                .strokeBorder(Color.border, lineWidth: 1)
-        }
+        .padding(.horizontal, Size.smallPadding)
     }
 
     private func loadWeatherData() async {
@@ -201,7 +205,8 @@ struct ConditionsCard: View {
     }
 
     private func fetchConditions(_ coord: CLLocationCoordinate2D) async throws -> Conditions {
-        guard var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast") else {
+        guard var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")
+        else {
             throw URLError(.badURL)
         }
         
@@ -219,7 +224,7 @@ struct ConditionsCard: View {
             throw URLError(.badURL)
         }
         
-        let (data, response) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await URLSession.shared.data(from: url)
         let meteoResponse = try JSONDecoder().decode(OpenMeteoResponse.self, from: data)
         
         let nowIndex = 72 + Calendar.current.component(.hour, from: .now)

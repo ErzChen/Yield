@@ -23,7 +23,7 @@ struct Modal<Content: View, Footer: View>: View {
                 Spacer()
                 Capsule()
                     .fill(Color.surfaceAccent)
-                    .frame(width: 60, height: 6)
+                    .frame(width: 56, height: 4)
                 Spacer()
             }
             .padding(.vertical, Size.regPadding)
@@ -110,7 +110,7 @@ struct SaveSpotModal: View {
     var body: some View {
         Modal(onClose: onCancel) {
             Text("Pin this spot")
-                .font(Font.besleyBold(Font.spotTitle))
+                .font(Font.besleyMedium(Font.spotTitle))
                 .foregroundStyle(Color.textPrimary)
 
             TextField("Name this spot", text: $name)

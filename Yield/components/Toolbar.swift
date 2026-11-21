@@ -9,7 +9,7 @@ struct DismissButton: ToolbarContent {
                 dismiss()
             } label: {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: Size.dismissIcon, weight: .bold))
+                    .font(.system(size: Size.iconInline, weight: .bold))
                     .foregroundStyle(Color.textPrimary)
             }
             .tint(Color.surface)

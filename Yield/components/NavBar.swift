@@ -1,5 +1,6 @@
 import SwiftUI
 
+
 struct NavBar: View {
     @Binding var currentTab: String
     let onAction: (String) -> Void
@@ -39,7 +40,7 @@ struct NavBar: View {
                 .opacity(logMenuOpened ? 0 : 1)
                 .allowsHitTesting(!logMenuOpened)
                 .animation(
-                    logMenuOpened ? .easeOut(duration: 0.15) : .easeIn(duration: 0.2).delay(0.25),
+                    logMenuOpened ? Motion.fastFade : Motion.fade.delay(0.25),
                     value: logMenuOpened
                 )
 
@@ -58,10 +59,10 @@ struct NavBar: View {
             VStack(spacing: Size.navButtonSpacing) {
                 Image(systemName: symbol)
                     .symbolVariant(isSelected ? .fill : .none)
-                    .font(.system(size: 22))
+                    .font(.system(size: Size.iconNav))
                     .frame(height: 28)
                 Text(title)
-                    .font(Font.manropeBold(Font.navText))
+                    .font(Font.manropeMedium(Font.navText))
             }
             .foregroundStyle(isSelected ? Color.accent : Color.textSecondary)
             .frame(maxWidth: .infinity)
@@ -77,10 +78,10 @@ struct NavBar: View {
             VStack(spacing: Size.navButtonSpacing
             ) {
                 Image(systemName: symbol)
-                    .font(.system(size: 22))
+                    .font(.system(size: Size.iconNav))
                     .frame(height: 28)
                 Text(title)
-                    .font(Font.manropeBold(Font.navText))
+                    .font(Font.manropeMedium(Font.navText))
             }
             .foregroundStyle(Color.surface)
             .frame(maxWidth: .infinity)
@@ -93,9 +94,9 @@ struct NavBar: View {
             toggleLogMenu()
         } label: {
             Image(systemName: "plus")
-                .font(.system(size: 26, weight: .semibold))
+                .font(.system(size: Size.iconFeature, weight: .semibold))
                 .rotationEffect(.degrees(logMenuOpened ? 135 : 0))
-                .animation(.linear(duration: 0.2), value: logMenuOpened)
+                .animation(Motion.spring, value: logMenuOpened)
                 .foregroundStyle(Color.surface)
                 .frame(width: Size.navButton, height: Size.navButton)
                 .background(Circle().fill(Color.accent).strokeBorder(Color.surface, lineWidth: 4))
@@ -106,11 +107,11 @@ struct NavBar: View {
 
     private func toggleLogMenu() {
         if logMenuOpened {
-            withAnimation(.easeOut(duration: 0.15)) { logItemsVisible = false }
-            withAnimation(.spring(duration: 0.4, bounce: 0).delay(0.1)) { logMenuOpened = false }
+            withAnimation(Motion.fastFade) { logItemsVisible = false }
+            withAnimation(Motion.spring.delay(0.1)) { logMenuOpened = false }
         } else {
-            withAnimation(.spring(duration: 0.45, bounce: 0)) { logMenuOpened = true }
-            withAnimation(.easeIn(duration: 0.2).delay(0.3)) { logItemsVisible = true }
+            withAnimation(Motion.spring) { logMenuOpened = true }
+            withAnimation(Motion.fade.delay(0.3)) { logItemsVisible = true }
         }
     }
 }

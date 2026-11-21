@@ -42,7 +42,7 @@ struct LibraryTab: View {
                         // Opening page content
                         if !isSearching && selectedDomain == nil {
                             Text("Browse by domain")
-                                .font(.besleyBold(Font.libraryTitle))
+                                .font(.besleyMedium(Font.libraryTitle))
                                 .foregroundStyle(Color.textPrimary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
@@ -51,7 +51,7 @@ struct LibraryTab: View {
                                     GridItem(.flexible(), spacing: Size.smallSpacing),
                                     GridItem(.flexible(), spacing: Size.smallSpacing)
                                 ],
-                                
+                                spacing: Size.smallSpacing
                             ) {
                                 domainCard(Domain(id: "fungi",  title: "Fungi",   image: "domain-fungi"))
                                 domainCard(Domain(id: "plant",  title: "Plants",  image: "domain-plants"))
@@ -60,7 +60,7 @@ struct LibraryTab: View {
                             }
                             
                             Text("All species")
-                                .font(.besleyBold(Font.libraryTitle))
+                                .font(.besleyMedium(Font.libraryTitle))
                                 .foregroundStyle(Color.textPrimary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -71,11 +71,11 @@ struct LibraryTab: View {
                                 results = []
                                 selectedDomain = nil
                             } label: {
-                                HStack(spacing: 6) {
+                                HStack(spacing: Size.smallSpacing) {
                                     Image(systemName: "chevron.left")
                                     Text(domain.title)
                                 }
-                                .font(.besleyBold(Font.libraryTitle))
+                                .font(.besleyMedium(Font.libraryTitle))
                                 .foregroundStyle(Color.accent)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }
@@ -87,7 +87,8 @@ struct LibraryTab: View {
                                 GridItem(.flexible(), spacing: Size.smallSpacing),
                                 GridItem(.flexible(), spacing: Size.smallSpacing)
                             ],
-                        ) {
+                                spacing: Size.smallSpacing
+                            ) {
                             ForEach(results) {
                                 species in
                                 
@@ -103,11 +104,12 @@ struct LibraryTab: View {
                                 }
                             }
                         }
-                        
                     }
                 }
+                .scrollIndicators(.hidden)
             }
-            .padding(.horizontal, Size.regPadding)
+            .padding(.horizontal, Size.pagePadding)
+            .background(Color.background)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationDestination(for: SpeciesSummary.self) {
                 species in
@@ -127,9 +129,10 @@ struct LibraryTab: View {
         }
         isLoadingMore = true
         let currentQuery = query
+        let currentDomain = selectedDomain?.id
         Task {
-            let page = await SpeciesDatabase.shared.search(currentQuery, selectedDomain?.id, pageSize, results.count, localCells)
-            if currentQuery == query {
+            let page = await SpeciesDatabase.shared.search(currentQuery, currentDomain, pageSize, results.count, localCells)
+            if currentQuery == query && currentDomain == selectedDomain?.id {
                 results += page
                 reachedEnd = page.count < pageSize
             }
@@ -167,7 +170,7 @@ struct LibraryTab: View {
                 }
                 .overlay {
                     LinearGradient(
-                        colors: [.clear, Color.black.opacity(0.75)],
+                        colors: [.clear, Color.Palette.black.opacity(0.75)],
                         startPoint: .center,
                         endPoint: .bottom
                     )
@@ -190,7 +193,6 @@ struct LibraryTab: View {
                 .overlay {
                     RoundedRectangle(cornerRadius: Radius.card).strokeBorder(Color.border, lineWidth: 1)
                 }
-                .appShadow()
         }
         .buttonStyle(.plain)
     }
@@ -198,6 +200,7 @@ struct LibraryTab: View {
     private var searchBar: some View {
         HStack(spacing: Size.smallPadding) {
             Image(systemName: "magnifyingglass")
+                .font(.system(size: Size.iconInline))
                 .foregroundStyle(Color.textSecondary)
             
             TextField("Search \(selectedDomain?.title.lowercased() ?? "species")", text: $query)
@@ -213,6 +216,7 @@ struct LibraryTab: View {
                     query = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: Size.iconInline))
                         .foregroundStyle(Color.textSecondary)
                 }
             }
