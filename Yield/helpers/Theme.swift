@@ -15,36 +15,57 @@ extension Color {
     
     static let background: Color = Palette.tan
     static let surface: Color = Palette.beige
-    static let surfaceAccent: Color = Palette.brown.opacity(0.6)
     static let textPrimary: Color = Palette.darkBrown
     static let textSecondary: Color = Palette.darkBrown.opacity(0.78)
     static let accent: Color = Palette.darkGreen
     static let border: Color = Palette.lightBrown.opacity(0.35)
     static let success: Color = Palette.green
     static let failure: Color = Palette.red
+    static let warning: Color = Palette.brown
+    static let overlay: Color = Palette.black.opacity(0.5)
+    static let overlayStrong: Color = Palette.black.opacity(0.75)
+    static let shadowColor: Color = Palette.darkBrown.opacity(0.1)
+    static let chartBar: Color = Palette.brown.opacity(0.6)
+    static let handle: Color = Palette.brown.opacity(0.6)
+    static let gridLine: Color = textSecondary.opacity(0.2)
+    static let gridLineStrong: Color = textSecondary.opacity(0.5)
 }
 
 struct CardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .padding(Size.pagePadding)
+            .padding(Size.large)
             .frame(maxWidth: .infinity)
-            .background {
-                RoundedRectangle(cornerRadius: Radius.card)
-                    .fill(Color.surface)
-                    .strokeBorder(Color.border, lineWidth: 1)
+            .bordered(.surface, Radius.card)
+            .padding(.horizontal, Size.large)
+    }
+}
+
+struct BorderedModifier: ViewModifier {
+    let fill: Color
+    let radius: CGFloat
+    
+    func body(content: Content) -> some View {
+        content
+            .background(fill)
+            .clipShape(RoundedRectangle(cornerRadius: radius))
+            .overlay {
+                RoundedRectangle(cornerRadius: radius).strokeBorder(Color.border, lineWidth: 1)
             }
-            .padding(.horizontal, Size.pagePadding)
     }
 }
 
 extension View {
     func appShadow() -> some View {
-        shadow(color: Color.Palette.darkBrown.opacity(0.1), radius: 8, y: 3)
+        shadow(color: Color.shadowColor, radius: 8, y: 3)
     }
     
     func cardStyle() -> some View {
         self.modifier(CardModifier())
+    }
+    
+    func bordered(_ fill: Color, _ radius: CGFloat) -> some View {
+        modifier(BorderedModifier(fill: fill, radius: radius))
     }
 }
 
@@ -68,37 +89,15 @@ extension Font {
         .custom("Manrope-Bold", size: size)
     }
     
-    // Splash Screen
-    static let splashTitle: CGFloat = 48
-    
-    // Nav Bar
-    static let navText: CGFloat = 12
-    
-    // Map Tab
-    static let spotTitle: CGFloat = 24
-    static let spotText: CGFloat = 16
-    
-    // Today Tab
-    static let conditionsLabel: CGFloat = 12
-    static let conditionsValue: CGFloat = 14
-    
-    // Library Tab
-    static let searchCommon: CGFloat = 12
-    static let searchSci: CGFloat = 11
-    static let domainName: CGFloat = 24
-    static let domainSubtitle: CGFloat = 12
-    static let libraryTitle: CGFloat = 18
-    static let imageAttribution: CGFloat = 11
-    static let detailTitle: CGFloat = 28
-    static let chartTitle: CGFloat = 18
-    static let chartSubtitle: CGFloat = 14
-    static let chartLabel: CGFloat = 11
-    static let infoTitle: CGFloat = 18
-    static let infoText: CGFloat = 16
-    static let edibilityTitle: CGFloat = 20
-    static let lookalikeName: CGFloat = 16
-    static let lookalikeSci: CGFloat = 12
-    static let errorText: CGFloat = 16
+    static let caption: CGFloat = 11
+    static let label: CGFloat = 12
+    static let bodySmall: CGFloat = 14
+    static let body: CGFloat = 16
+    static let heading: CGFloat = 18
+    static let subtitle: CGFloat = 20
+    static let title: CGFloat = 24
+    static let display: CGFloat = 28
+    static let splash: CGFloat = 48
 }
 
 enum Size {
@@ -111,26 +110,37 @@ enum Size {
     // Nav Bar
     static let navButton: CGFloat = 64
     
+    // Today Tab
+    static let conditionsMinHeight: CGFloat = 80
+    static let conditionsValueMinHeight: CGFloat = 32
+    
+    // Map Tab
+    static let speciesThumb: CGFloat = 48
+    static let stepperFieldWidth: CGFloat = 72
+    
     // Library Tab
     static let domainHeight: CGFloat = 180
     static let detailImage: CGFloat = 260
     static let chart: CGFloat = 140
     static let lookalikeThumb: CGFloat = 72
     
-    static let smallPadding: CGFloat = 8
-    static let regPadding: CGFloat = 12
-    static let pagePadding: CGFloat = 16
-    static let largePadding: CGFloat = 20
-    static let domainPadding: CGFloat = 40
+    static let extraSmall: CGFloat = 4
+    static let small: CGFloat = 8
+    static let medium: CGFloat = 12
+    static let large: CGFloat = 16
+    static let extraLarge: CGFloat = 20
+    static let extraExtraLarge: CGFloat = 24
     
-    static let navButtonSpacing: CGFloat = 4
-    static let smallSpacing: CGFloat = 8
+    static let pagePadding: CGFloat = large
+    static let handleWidth: CGFloat = 56
+    static let iconBox: CGFloat = 28
 }
 
 enum Motion {
     static let spring = Animation.spring(duration: 0.4, bounce: 0)
     static let fastFade = Animation.easeOut(duration: 0.15)
     static let fade = Animation.easeOut(duration: 0.2)
+    static let panel = Animation.spring(duration: 0.35)
 }
 
 enum Radius {

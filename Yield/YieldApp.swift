@@ -3,22 +3,22 @@ import SwiftUI
 @main
 struct YieldApp: App {
     @State private var location = LocationManager()
-    @State private var spots = SpotStore()
+    @State private var store = SpotStore()
     
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(location)
-                .environment(spots)
+                .environment(store)
         }
     }
 }
 
 struct RootView: View {
     @Environment(LocationManager.self) private var location
-    @Environment(SpotStore.self) private var spots
+    @Environment(SpotStore.self) private var store
     
-    @State private var currentTab = "Library"
+    @State private var currentTab = "Spots"
 
     var body: some View {
         VStack(spacing: 0) {
@@ -41,7 +41,7 @@ struct RootView: View {
         .background(Color.background)
         .task {
             location.start()
-            await spots.load()
+            await store.load()
         }
     }
 }

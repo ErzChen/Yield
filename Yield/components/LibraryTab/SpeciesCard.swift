@@ -37,25 +37,20 @@ struct SpeciesCard: View {
 
             VStack(alignment: .leading) {
                 Text(commonName)
-                    .font(.besleyBold(Font.searchCommon))
+                    .font(.besleyBold(Font.label))
                     .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
                 Text(sciName)
-                    .font(.manropeRegular(Font.searchSci))
+                    .font(.manropeRegular(Font.caption))
                     .italic()
                     .foregroundStyle(Color.textSecondary)
                     .lineLimit(1)
             }
-            .padding(.vertical, Size.smallPadding)
-            .padding(.horizontal, Size.regPadding)
+            .padding(.vertical, Size.small)
+            .padding(.horizontal, Size.medium)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(Color.surface)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.card)
-                .strokeBorder(Color.border, lineWidth: 1)
-        }
+        .bordered(.surface, Radius.card)
     }
 }
 
@@ -72,22 +67,34 @@ struct SpeciesDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: Size.largePadding) {
+            VStack(alignment: .leading, spacing: Size.extraLarge) {
                 gallery
                 VStack(alignment: .leading, spacing: 2) {
                     Text(species.common_name)
-                        .font(.besleyBold(Font.detailTitle))
+                        .font(.besleyBold(Font.display))
                         .foregroundStyle(Color.textPrimary)
                     Text(species.sci_name)
-                        .font(.manropeRegular(Font.spotText))
+                        .font(.manropeRegular(Font.body))
                         .italic()
                         .foregroundStyle(Color.textSecondary)
+                    if info?.isInvasive == true {
+                        HStack(spacing: Size.extraSmall) {
+                            Image(systemName: "exclamationmark.octagon.fill")
+                            Text("Invasive")
+                        }
+                        .font(.manropeBold(Font.body))
+                        .foregroundStyle(Color.failure)
+                        .padding(.horizontal, Size.small)
+                        .padding(.vertical, Size.extraSmall)
+                        .background(Color.failure.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+                    }
                 }
                 seasonChart
                 infoSection
             }
             .padding(.horizontal, Size.pagePadding)
-            .padding(.bottom, Size.largePadding)
+            .padding(.bottom, Size.pagePadding)
         }
         .background(Color.background)
         .navigationBarBackButtonHidden(true)
@@ -113,45 +120,40 @@ struct SpeciesDetailView: View {
         return Group {
             if loaded {
                 if info == nil {
-                    HStack(alignment: .top, spacing: Size.regPadding) {
+                    HStack(alignment: .top, spacing: Size.medium) {
                         Image(systemName: "questionmark.circle.fill")
                             .font(.system(size: Size.iconFeature))
                             .foregroundStyle(Color.failure)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("No notes written for this species yet.")
-                                .font(.manropeMedium(Font.infoText))
+                                .font(.manropeMedium(Font.body))
                                 .foregroundStyle(Color.textSecondary)
                             Text("Never assume a species is safe to eat.")
-                                .font(.manropeMedium(Font.infoText))
+                                .font(.manropeMedium(Font.body))
                                 .foregroundStyle(Color.textPrimary)
                         }
                     }
-                    .padding(Size.regPadding)
+                    .padding(Size.medium)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.card))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: Radius.card)
-                            .strokeBorder(Color.border, lineWidth: 1)
-                    }
+                    .bordered(.surface, Radius.card)
                 } else {
-                    VStack(alignment: .leading, spacing: Size.regPadding) {
+                    VStack(alignment: .leading, spacing: Size.medium) {
                         edibilitySection
                         lookalikesSection
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Description")
-                                .font(.manropeMedium(Font.infoTitle))
+                                .font(.manropeMedium(Font.heading))
                                 .foregroundStyle(Color.accent)
                             Text(info?.description ?? "Not written yet")
-                                .font(.manropeRegular(Font.infoText))
+                                .font(.manropeRegular(Font.body))
                                 .foregroundStyle(info?.description == nil ? Color.textSecondary : Color.textPrimary)
                         }
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Habitat")
-                                .font(.manropeMedium(Font.infoTitle))
+                                .font(.manropeMedium(Font.heading))
                                 .foregroundStyle(Color.accent)
                             Text(info?.habitat ?? "Not written yet")
-                                .font(.manropeRegular(Font.infoText))
+                                .font(.manropeRegular(Font.body))
                                 .foregroundStyle(info?.habitat == nil ? Color.textSecondary : Color.textPrimary)
                         }
                     }
@@ -168,24 +170,24 @@ struct SpeciesDetailView: View {
         let detail: String = info?.edibility?.sentence ?? "Never assume a species is safe to eat."
         let isFilled: Bool = category == .deadly
 
-        return VStack(alignment: .leading, spacing: Size.smallPadding) {
+        return VStack(alignment: .leading, spacing: Size.small) {
             Text("Edibility")
-                .font(.manropeMedium(Font.infoTitle))
+                .font(.manropeMedium(Font.heading))
                 .foregroundStyle(Color.accent)
-            HStack(spacing: Size.smallSpacing) {
+            HStack(spacing: Size.small) {
                 Image(systemName: symbol)
                 Text(headline)
             }
-            .font(.besleyBold(Font.edibilityTitle))
+            .font(.besleyBold(Font.subtitle))
             .foregroundStyle(isFilled ? Color.surface : tint)
-            .padding(.horizontal, Size.regPadding)
-            .padding(.vertical, Size.smallPadding)
+            .padding(.horizontal, Size.medium)
+            .padding(.vertical, Size.small)
             .background(
                 isFilled ? tint : tint.opacity(0.12),
                 in: RoundedRectangle(cornerRadius: Radius.tile)
             )
             Text(detail)
-                .font(.manropeRegular(Font.infoText))
+                .font(.manropeRegular(Font.body))
                 .foregroundStyle(Color.textPrimary)
         }
     }
@@ -196,35 +198,29 @@ struct SpeciesDetailView: View {
         let others: [Lookalike] = all.filter { !$0.isDangerous }
         let sorted: [Lookalike] = dangerous + others
 
-        return VStack(alignment: .leading, spacing: Size.smallPadding) {
+        return VStack(alignment: .leading, spacing: Size.small) {
             Text("Lookalikes")
-                .font(.manropeMedium(Font.infoTitle))
+                .font(.manropeMedium(Font.heading))
                 .foregroundStyle(Color.accent)
             if sorted.isEmpty {
                 Text("Not written yet")
-                    .font(.manropeRegular(Font.infoText))
+                    .font(.manropeRegular(Font.body))
                     .foregroundStyle(Color.textSecondary)
             } else {
                 ForEach(sorted) {
                     lookalike in
 
-                    lookalikeRow(lookalike)
+                    if let linked = lookalike.summary {
+                        Button {
+                            selectedLookalike = linked
+                        } label: {
+                            lookalikeCard(lookalike, linked: true)
+                        }
+                    } else {
+                        lookalikeCard(lookalike, linked: false)
+                    }
                 }
             }
-        }
-    }
-
-    @ViewBuilder
-    private func lookalikeRow(_ lookalike: Lookalike) -> some View {
-        if let linked = lookalike.summary {
-            Button {
-                selectedLookalike = linked
-            } label: {
-                lookalikeCard(lookalike, linked: true)
-            }
-            .buttonStyle(.plain)
-        } else {
-            lookalikeCard(lookalike, linked: false)
         }
     }
 
@@ -237,19 +233,29 @@ struct SpeciesDetailView: View {
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(lookalike.commonName)
-                    .font(.besleyMedium(Font.lookalikeName))
+                    .font(.besleyMedium(Font.body))
                     .foregroundStyle(Color.textPrimary)
+                    .lineHeight(.normal)
                 Text(lookalike.sciName)
-                    .font(.manropeRegular(Font.lookalikeSci))
+                    .font(.manropeRegular(Font.label))
                     .italic()
                     .foregroundStyle(Color.textSecondary)
-                Spacer()
+                    .lineHeight(.normal)
                 if lookalike.isDangerous {
-                    dangerTag
+                    Spacer()
+                    HStack(spacing: Size.extraSmall) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                        Text("Toxic")
+                    }
+                    .font(.manropeBold(Font.caption))
+                    .foregroundStyle(Color.failure)
+                    .padding(.horizontal, Size.small)
+                    .padding(.vertical, Size.extraSmall)
+                    .background(Color.failure.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.card))
                 }
             }
             .padding(.horizontal, 2)
-            .frame(minHeight: Size.lookalikeThumb)
             Spacer()
             if linked {
                 Image(systemName: "chevron.right")
@@ -258,40 +264,22 @@ struct SpeciesDetailView: View {
                     .frame(height: Size.lookalikeThumb)
             }
         }
-        .padding(Size.smallPadding)
+        .padding(Size.small)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.surface)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.card)
-                .strokeBorder(Color.border, lineWidth: 1)
-        }
-    }
-
-    private var dangerTag: some View {
-        HStack(spacing: 4) {
-            Image(systemName: "exclamationmark.triangle.fill")
-            Text("Toxic")
-        }
-        .font(.manropeBold(Font.searchSci))
-        .foregroundStyle(Color.failure)
-        .padding(.horizontal, Size.smallPadding)
-        .padding(.vertical, 4)
-        .background(Color.failure.opacity(0.12))
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+        .bordered(.surface, Radius.card)
     }
     
     private var seasonChart: some View {
-        VStack(alignment: .leading, spacing: Size.smallSpacing) {
+        VStack(alignment: .leading, spacing: Size.small) {
             Text("When it's in season here")
-                .font(.besleyMedium(Font.chartTitle))
+                .font(.besleyMedium(Font.heading))
                 .foregroundStyle(Color.textPrimary)
             if !loaded {
                 ProgressView()
                     .frame(maxWidth: .infinity, minHeight: Size.chart)
             } else if season.levels.isEmpty {
                 Text("No sightings recorded near you for this species.")
-                    .font(.manropeRegular(Font.chartSubtitle))
+                    .font(.manropeRegular(Font.bodySmall))
                     .foregroundStyle(Color.textSecondary)
             } else {
                 let now = currentWeek()
@@ -305,14 +293,14 @@ struct SpeciesDetailView: View {
                     .foregroundStyle(
                         level.week == now
                         ? Color.accent
-                        : Color.surfaceAccent
+                        : Color.chartBar
                     )
                     RuleMark(x: .value("Current Week", now))
                         .lineStyle(StrokeStyle(lineWidth: 2))
                         .foregroundStyle(Color.accent)
                         .annotation(position: .top, alignment: .center) {
                             Text("Now")
-                                .font(.manropeBold(Font.chartLabel))
+                                .font(.manropeBold(Font.caption))
                                 .foregroundStyle(Color.accent)
                         }
                 }
@@ -321,13 +309,13 @@ struct SpeciesDetailView: View {
                     AxisMarks(position: .leading, values: [0.0, 1.0]) {
                         value in
                         
-                        AxisGridLine().foregroundStyle(Color.textSecondary.opacity(0.2))
+                        AxisGridLine().foregroundStyle(Color.gridLine)
                         AxisValueLabel {
                             if let level = value.as(Double.self) {
                                 Text(level >= 1 ? "Peak" : "Low")
                             }
                         }
-                        .font(.manropeRegular(Font.chartLabel))
+                        .font(.manropeRegular(Font.caption))
                         .foregroundStyle(Color.textSecondary)
                     }
                 }
@@ -347,18 +335,18 @@ struct SpeciesDetailView: View {
                                 }
                             }
                         }
-                        .font(.manropeRegular(Font.chartLabel))
+                        .font(.manropeRegular(Font.caption))
                         .foregroundStyle(Color.textSecondary)
                         AxisGridLine(stroke: StrokeStyle(lineWidth: 1))
-                            .foregroundStyle(Color.textSecondary.opacity(0.5))
+                            .foregroundStyle(Color.gridLineStrong)
                         AxisTick(stroke: StrokeStyle(lineWidth: 1))
-                            .foregroundStyle(Color.textSecondary.opacity(0.5))
+                            .foregroundStyle(Color.gridLineStrong)
                     }
                 }
                 .frame(height: Size.chart)
 
                 Text(rangeNote)
-                    .font(.manropeRegular(Font.chartSubtitle))
+                    .font(.manropeRegular(Font.bodySmall))
                     .foregroundStyle(Color.textSecondary)
             }
         }
@@ -403,10 +391,10 @@ struct SpeciesDetailView: View {
                         .overlay(alignment: .bottomLeading) {
                             if let credit = img.attribution {
                                 Text(credit)
-                                    .font(.manropeRegular(Font.imageAttribution))
+                                    .font(.manropeRegular(Font.caption))
                                     .foregroundStyle(Color.surface)
-                                    .padding(Size.smallPadding)
-                                    .background(Color.Palette.black.opacity(0.5))
+                                    .padding(Size.small)
+                                    .background(Color.overlay)
                             }
                         }
                     }

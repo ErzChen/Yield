@@ -19,7 +19,6 @@ struct LibraryTab: View {
     @State private var selectedDomain: Domain?
     @State private var reachedEnd = false
     @State private var isLoadingMore = false
-    @FocusState private var searchFocused: Bool
     
     private let pageSize = 30
     private var isSearching: Bool {
@@ -38,20 +37,20 @@ struct LibraryTab: View {
             VStack() {
                 searchBar
                 ScrollView {
-                    VStack(spacing: Size.regPadding) {
+                    VStack(spacing: Size.medium) {
                         // Opening page content
                         if !isSearching && selectedDomain == nil {
                             Text("Browse by domain")
-                                .font(.besleyMedium(Font.libraryTitle))
+                                .font(.besleyMedium(Font.heading))
                                 .foregroundStyle(Color.textPrimary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
                             LazyVGrid(
                                 columns: [
-                                    GridItem(.flexible(), spacing: Size.smallSpacing),
-                                    GridItem(.flexible(), spacing: Size.smallSpacing)
+                                    GridItem(.flexible(), spacing: Size.small),
+                                    GridItem(.flexible(), spacing: Size.small)
                                 ],
-                                spacing: Size.smallSpacing
+                                spacing: Size.small
                             ) {
                                 domainCard(Domain(id: "fungi",  title: "Fungi",   image: "domain-fungi"))
                                 domainCard(Domain(id: "plant",  title: "Plants",  image: "domain-plants"))
@@ -60,7 +59,7 @@ struct LibraryTab: View {
                             }
                             
                             Text("All species")
-                                .font(.besleyMedium(Font.libraryTitle))
+                                .font(.besleyMedium(Font.heading))
                                 .foregroundStyle(Color.textPrimary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -71,11 +70,11 @@ struct LibraryTab: View {
                                 results = []
                                 selectedDomain = nil
                             } label: {
-                                HStack(spacing: Size.smallSpacing) {
+                                HStack(spacing: Size.small) {
                                     Image(systemName: "chevron.left")
                                     Text(domain.title)
                                 }
-                                .font(.besleyMedium(Font.libraryTitle))
+                                .font(.besleyMedium(Font.heading))
                                 .foregroundStyle(Color.accent)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }
@@ -84,10 +83,10 @@ struct LibraryTab: View {
                         // Species list
                         LazyVGrid(
                             columns: [
-                                GridItem(.flexible(), spacing: Size.smallSpacing),
-                                GridItem(.flexible(), spacing: Size.smallSpacing)
+                                GridItem(.flexible(), spacing: Size.small),
+                                GridItem(.flexible(), spacing: Size.small)
                             ],
-                                spacing: Size.smallSpacing
+                                spacing: Size.small
                             ) {
                             ForEach(results) {
                                 species in
@@ -109,6 +108,7 @@ struct LibraryTab: View {
                 .scrollIndicators(.hidden)
             }
             .padding(.horizontal, Size.pagePadding)
+            .padding(.bottom, Size.pagePadding)
             .background(Color.background)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationDestination(for: SpeciesSummary.self) {
@@ -170,7 +170,7 @@ struct LibraryTab: View {
                 }
                 .overlay {
                     LinearGradient(
-                        colors: [.clear, Color.Palette.black.opacity(0.75)],
+                        colors: [.clear, Color.overlayStrong],
                         startPoint: .center,
                         endPoint: .bottom
                     )
@@ -178,35 +178,30 @@ struct LibraryTab: View {
                 .overlay(alignment: .bottomLeading) {
                     VStack(alignment: .leading) {
                         Text(domain.title)
-                            .font(.besleyBold(Font.domainName))
-                        HStack(spacing: 4) {
+                            .font(.besleyBold(Font.title))
+                        HStack(spacing: Size.extraSmall) {
                             Text("Browse")
-                                .font(.manropeBold(Font.domainSubtitle))
+                                .font(.manropeBold(Font.label))
                             Image(systemName: "arrow.right")
-                                .font(.system(size: Font.domainSubtitle, weight: .bold))
+                                .font(.system(size: Font.label, weight: .bold))
                         }
                     }
                     .foregroundStyle(Color.background)
-                    .padding(Size.regPadding)
+                    .padding(Size.medium)
                 }
-                .clipShape(RoundedRectangle(cornerRadius: Radius.card))
-                .overlay {
-                    RoundedRectangle(cornerRadius: Radius.card).strokeBorder(Color.border, lineWidth: 1)
-                }
+                .bordered(.clear, Radius.card)
         }
-        .buttonStyle(.plain)
     }
     
     private var searchBar: some View {
-        HStack(spacing: Size.smallPadding) {
+        HStack(spacing: Size.small) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: Size.iconInline))
                 .foregroundStyle(Color.textSecondary)
             
             TextField("Search \(selectedDomain?.title.lowercased() ?? "species")", text: $query)
-                .font(Font.manropeRegular(Font.spotText))
+                .font(.manropeRegular(Font.body))
                 .foregroundStyle(Color.textPrimary)
-                .focused($searchFocused)
                 .submitLabel(.search)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
@@ -221,11 +216,7 @@ struct LibraryTab: View {
                 }
             }
         }
-        .padding(Size.regPadding)
-        .background {
-            RoundedRectangle(cornerRadius: Radius.tile)
-                .fill(Color.surface)
-                .strokeBorder(Color.border, lineWidth: 1)
-        }
+        .padding(Size.medium)
+        .bordered(.surface, Radius.tile)
     }
 }

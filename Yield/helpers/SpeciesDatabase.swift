@@ -110,7 +110,7 @@ enum EdibilityCategory: String {
         case .edible:
             return Color.success
         case .edibleWithPrep, .notRecommended:
-            return Color.Palette.brown
+            return Color.warning
         case .toxic, .deadly:
             return Color.failure
         }
@@ -350,13 +350,10 @@ extension SpeciesDatabase {
                         $0.trimmingCharacters(in: .whitespacesAndNewlines)
                     }
                 
-                // A bad edibility string must not throw away the lookalikes and the rest
-                // of the row. Leave edibility nil; the UI then shows "Not written yet"
-                // plus the "never assume it's safe" warning.
                 if parts.count == 2, let category = EdibilityCategory(rawValue: parts[0]) {
                     edibility = Edibility(category: category, sentence: parts[1])
                 } else {
-                    print("Malformed edibility for species \(speciesId):", text)
+                    print("Incorrectly formatted edibility for species \(speciesId):", text)
                 }
             }
             

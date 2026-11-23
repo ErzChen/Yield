@@ -2,10 +2,12 @@ import SwiftUI
 
 
 struct NavBar: View {
-    @Binding var currentTab: String
-    let onAction: (String) -> Void
     @State private var logMenuOpened = false
     @State private var logItemsVisible = false
+    
+    @Binding var currentTab: String
+    
+    let onAction: (String) -> Void
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 0) {
@@ -15,7 +17,7 @@ struct NavBar: View {
             slot("text.book.closed", "Library", "camera", "Photo")
             slot("person.crop.circle", "You", "figure.walk", "Trip")
         }
-        .padding(.top, Size.smallPadding)
+        .padding(.top, Size.small)
         .background {
             ZStack(alignment: .topLeading) {
                 Color.surface
@@ -27,7 +29,7 @@ struct NavBar: View {
                         .scaleEffect(logMenuOpened ? 7 : 1)
                     Spacer()
                 }
-                .padding(.top, Size.smallPadding)
+                .padding(.top, Size.small)
             }
             .clipped()
             .ignoresSafeArea(edges: .bottom)
@@ -56,13 +58,13 @@ struct NavBar: View {
         return Button {
             currentTab = title
         } label: {
-            VStack(spacing: Size.navButtonSpacing) {
+            VStack(spacing: Size.extraSmall) {
                 Image(systemName: symbol)
                     .symbolVariant(isSelected ? .fill : .none)
                     .font(.system(size: Size.iconNav))
-                    .frame(height: 28)
+                    .frame(height: Size.iconBox)
                 Text(title)
-                    .font(Font.manropeMedium(Font.navText))
+                    .font(.manropeMedium(Font.label))
             }
             .foregroundStyle(isSelected ? Color.accent : Color.textSecondary)
             .frame(maxWidth: .infinity)
@@ -75,13 +77,13 @@ struct NavBar: View {
             toggleLogMenu()
             onAction(title)
         } label: {
-            VStack(spacing: Size.navButtonSpacing
+            VStack(spacing: Size.extraSmall
             ) {
                 Image(systemName: symbol)
                     .font(.system(size: Size.iconNav))
-                    .frame(height: 28)
+                    .frame(height: Size.iconBox)
                 Text(title)
-                    .font(Font.manropeMedium(Font.navText))
+                    .font(.manropeMedium(Font.label))
             }
             .foregroundStyle(Color.surface)
             .frame(maxWidth: .infinity)
@@ -114,13 +116,4 @@ struct NavBar: View {
             withAnimation(Motion.fade.delay(0.3)) { logItemsVisible = true }
         }
     }
-}
-
-#Preview {
-    @Previewable @State var selectedTab: String = "Today"
-    VStack {
-        Spacer()
-        NavBar(currentTab: $selectedTab, onAction: { _ in })
-    }
-    .background(Color.background)
 }

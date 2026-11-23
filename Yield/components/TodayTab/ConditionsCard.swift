@@ -65,19 +65,19 @@ struct ConditionsCard: View {
     
     private func loadingView() -> some View {
         return ProgressView()
-            .frame(maxWidth: .infinity, minHeight: 80)
+            .frame(maxWidth: .infinity, minHeight: Size.conditionsMinHeight)
     }
     
     private func errorView(_ message: String) -> some View {
-        return VStack(spacing: Size.smallSpacing) {
+        return VStack(spacing: Size.small) {
             Image(systemName: "icloud.slash")
                 .font(.system(size: Size.iconFeature))
             Text(message)
-                .font(.manropeMedium(Font.errorText))
+                .font(.manropeMedium(Font.body))
                 .multilineTextAlignment(.center)
         }
         .foregroundStyle(Color.textSecondary)
-        .frame(maxWidth: .infinity, minHeight: 80)
+        .frame(maxWidth: .infinity, minHeight: Size.conditionsMinHeight)
     }
     
     private func loadedView(_ conditions: Conditions) -> some View {
@@ -148,7 +148,7 @@ struct ConditionsCard: View {
             )
         ]
         
-        return HStack(alignment: .top, spacing: Size.smallSpacing) {
+        return HStack(alignment: .top, spacing: Size.small) {
             ForEach(tiles) {
                 tile in
                 
@@ -159,14 +159,14 @@ struct ConditionsCard: View {
     }
     
     private func conditionsDisplay(_ tile: ConditionTile) -> some View {
-        VStack(spacing: Size.smallSpacing) {
+        VStack(spacing: Size.small) {
             Image(systemName: tile.symbol)
                 .font(.system(size: Size.iconFeature))
                 .foregroundStyle(Color.accent)
-                .frame(height: 28)
+                .frame(height: Size.iconBox)
             HStack(spacing: 0) {
                 Text(tile.value)
-                    .font(.besleyMedium(Font.conditionsValue))
+                    .font(.besleyMedium(Font.bodySmall))
                     .monospacedDigit()
                     .multilineTextAlignment(.center)
                     .lineHeight(.normal)
@@ -179,15 +179,15 @@ struct ConditionsCard: View {
                         .foregroundStyle(Color.textSecondary)
                 }
             }
-            .frame(minHeight: 32)
+            .frame(minHeight: Size.conditionsValueMinHeight)
             Text(tile.label)
-                .font(.manropeRegular(Font.conditionsLabel))
+                .font(.manropeRegular(Font.label))
                 .foregroundStyle(Color.textSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .padding(.horizontal, Size.smallPadding)
+        .padding(.horizontal, Size.small)
     }
 
     private func loadWeatherData() async {

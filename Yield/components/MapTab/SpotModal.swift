@@ -22,33 +22,29 @@ struct Modal<Content: View, Footer: View>: View {
             HStack {
                 Spacer()
                 Capsule()
-                    .fill(Color.surfaceAccent)
-                    .frame(width: 56, height: 4)
+                    .fill(Color.handle)
+                    .frame(width: Size.handleWidth, height: Size.extraSmall)
                 Spacer()
             }
-            .padding(.vertical, Size.regPadding)
+            .padding(.vertical, Size.medium)
             .contentShape(Rectangle())
             .gesture(dismissGesture)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    content
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: 0) {
+                content
             }
-            .scrollIndicators(.hidden)
-            .scrollBounceBehavior(.basedOnSize)
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             footer
-                .padding(.top, Size.regPadding)
-                .padding(.bottom, Size.largePadding)
+                .padding(.top, Size.medium)
+                .padding(.bottom, Size.extraLarge)
         }
-        .padding(.horizontal, Size.largePadding)
-        .frame(maxWidth: .infinity, maxHeight: 300, alignment: .leading)
+        .padding(.horizontal, Size.extraLarge)
         .background(
             RoundedRectangle(cornerRadius: Radius.card)
                 .fill(Color.surface)
         )
+        .frame(maxWidth: .infinity, maxHeight: 300, alignment: .bottom)
         .appShadow()
         .offset(y: dragOffset)
     }
@@ -69,7 +65,7 @@ struct Modal<Content: View, Footer: View>: View {
                 if closed {
                     onClose()
                 } else {
-                    withAnimation(.spring(duration: 0.3)) {
+                    withAnimation(Motion.panel) {
                         dragOffset = 0
                     }
                 }
@@ -85,54 +81,107 @@ extension Modal where Footer == EmptyView {
 }
 
 struct SpotModal: View {
+    @Environment(SpotStore.self) private var store
+
     let spot: Spot
     let onClose: () -> Void
+    let onAddSighting: () -> Void
 
     var body: some View {
+        let sightings = store.sightings(for: spot)
+
         Modal(onClose: onClose) {
             Text(spot.name)
-                .font(Font.besleyBold(Font.spotTitle))
+                .font(.besleyBold(Font.title))
                 .foregroundStyle(Color.textPrimary)
-            Text(String(format: "%.4f, %.4f", spot.latitude, spot.longitude))
-                .font(Font.manropeRegular(Font.spotText))
+            Text(sightings.isEmpty ? "No sightings yet" : "\(sightings.count) \(sightings.count > 1 ? "sightings" : "sighting")")
+                .font(.manropeRegular(Font.body))
                 .foregroundStyle(Color.textSecondary)
+
+            if !sightings.isEmpty {
+                VStack(spacing: Size.small) {
+                    ForEach(sightings.prefix(2)) {
+                        sighting in
+
+                        sightingCard(sighting)
+                    }
+                }
+                .padding(.top, Size.medium)
+            }
+        } footer: {
+            Button(action: onAddSighting) {
+                Text("Add Sighting")
+                    .font(.manropeBold(Font.body))
+                    .foregroundStyle(Color.surface)
+                    .frame(maxWidth: .infinity)
+                    .padding(Size.medium)
+                    .background {
+                        RoundedRectangle(cornerRadius: Radius.tile)
+                            .fill(Color.accent)
+                    }
+            }
         }
+    }
+    
+    private func sightingCard(_ sighting: Sighting) -> some View {
+        HStack(alignment: .center, spacing: Size.small) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(sighting.speciesName)
+                    .font(.besleyMedium(Font.body))
+                    .foregroundStyle(Color.textPrimary)
+                    .lineHeight(.normal)
+
+                Text(sighting.date.formatted(date: .abbreviated, time: .omitted))
+                    .font(.manropeRegular(Font.bodySmall))
+                    .foregroundStyle(Color.textSecondary)
+            }
+
+            Spacer()
+
+            Text("\(sighting.amount)")
+                .font(.manropeRegular(Font.bodySmall))
+                .monospacedDigit()
+                .foregroundStyle(Color.textPrimary)
+                .padding(.horizontal, Size.medium)
+                .padding(.vertical, Size.extraSmall)
+                .background {
+                    Capsule().fill(Color.border)
+                }
+        }
+        .padding(Size.small)
+        .bordered(.background, Radius.tile)
     }
 }
 
 struct SaveSpotModal: View {
-    @Binding var name: String
+    @FocusState private var focused: Bool
+    @State var name: String
+    
     let onSave: () -> Void
     let onCancel: () -> Void
-
-    @FocusState private var focused: Bool
 
     var body: some View {
         Modal(onClose: onCancel) {
             Text("Pin this spot")
-                .font(Font.besleyMedium(Font.spotTitle))
+                .font(.besleyMedium(Font.title))
                 .foregroundStyle(Color.textPrimary)
 
             TextField("Name this spot", text: $name)
-                .font(Font.manropeRegular(Font.spotText))
+                .font(.manropeRegular(Font.body))
                 .foregroundStyle(Color.textPrimary)
                 .focused($focused)
                 .submitLabel(.done)
                 .onSubmit(onSave)
-                .padding(Size.regPadding)
-                .background {
-                    RoundedRectangle(cornerRadius: Radius.tile)
-                        .fill(Color.background)
-                        .strokeBorder(Color.border, lineWidth: 1)
-                }
-                .padding(.top, Size.smallPadding)
+                .padding(Size.medium)
+                .bordered(.background, Radius.tile)
+                .padding(.top, Size.small)
         } footer: {
             Button(action: onSave) {
                 Text("Drop Pin")
-                    .font(Font.manropeBold(Font.spotText))
+                    .font(.manropeBold(Font.body))
                     .foregroundStyle(Color.surface)
                     .frame(maxWidth: .infinity)
-                    .padding(Size.regPadding)
+                    .padding(Size.medium)
                     .background {
                         RoundedRectangle(cornerRadius: Radius.tile)
                             .fill(Color.accent)

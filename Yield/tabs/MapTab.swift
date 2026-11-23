@@ -3,22 +3,41 @@ import MapKit
 
 struct MapTab: View {
     @Environment(LocationManager.self) private var location
-    @Environment(SpotStore.self) private var spots
+    @Environment(SpotStore.self) private var store
     @State private var newName = ""
     @State private var pendingCoordinate: CLLocationCoordinate2D?
     @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
     @State private var selectedSpot: Spot?
+    @State private var addingTo: Spot?
     
     var body: some View {
+        NavigationStack {
+            mapView
+                .toolbar(.hidden, for: .navigationBar)
+                .navigationDestination(item: $addingTo) {
+                    spot in
+
+                    AddSightingPage(spotName: spot.name) {
+                        species, amount in
+
+                        Task {
+                            await store.addSighting(to: spot, species: species, amount: amount)
+                        }
+                    }
+                }
+        }
+    }
+
+    private var mapView: some View {
         Map(position: $position) {
             UserAnnotation()
-            ForEach(spots.spots) {
+            ForEach(store.spots) {
                 spot in
                 
                 Annotation(spot.name, coordinate: spot.coordinate) {
                     Button {
                         pendingCoordinate = nil
-                        withAnimation(.spring(duration: 0.35)) {
+                        withAnimation(Motion.panel) {
                             selectedSpot = spot
                         }
                     } label: {
@@ -26,7 +45,6 @@ struct MapTab: View {
                             .frame(width: Size.tapTarget, height: Size.tapTarget)
                             .contentShape(Rectangle())
                     }
-                
                 }
             }
             if let pending = pendingCoordinate {
@@ -44,13 +62,15 @@ struct MapTab: View {
         .mapStyle(.imagery(elevation: .realistic))
         .overlay(alignment: .bottom) {
             if let spot = selectedSpot {
-                SpotModal(spot: spot, onClose: closeSpot)
+                SpotModal(spot: spot, onClose: closeSpot, onAddSighting: {
+                    addingTo = spot
+                })
                     .id(spot.id)
                     .padding(Size.pagePadding)
                     .transition(.move(edge: .bottom))
             } else if pendingCoordinate != nil {
                 SaveSpotModal(
-                    name: $newName,
+                    name: newName,
                     onSave: {
                         Task {
                             await saveSpot()
@@ -67,10 +87,10 @@ struct MapTab: View {
                         Image(systemName: "mappin")
                             .font(.system(size: Size.iconFeature, weight: .semibold))
                             .foregroundStyle(Color.surface)
-                            .padding(Size.regPadding)
+                            .padding(Size.medium)
                             .background(Circle().fill(Color.accent).strokeBorder(Color.surface, lineWidth: 2))
                             .appShadow()
-                            .padding(Size.largePadding)
+                            .padding(Size.extraLarge)
                     }
                 }
             }
@@ -81,7 +101,7 @@ struct MapTab: View {
         Image(systemName: "mappin")
             .font(.system(size: Size.iconInline))
             .foregroundStyle(Color.surface)
-            .padding(Size.smallPadding)
+            .padding(Size.small)
             .background(Circle().fill(Color.accent).strokeBorder(Color.surface, lineWidth: 2))
             .appShadow()
     }
@@ -91,20 +111,20 @@ struct MapTab: View {
             return
         }
         newName = ""
-        withAnimation(.spring(duration: 0.35)) {
+        withAnimation(Motion.panel) {
             pendingCoordinate = coordinate
         }
     }
 
     private func cancelPending() {
-        withAnimation(.spring(duration: 0.35)) {
+        withAnimation(Motion.panel) {
             pendingCoordinate = nil
         }
         newName = ""
     }
 
     private func closeSpot() {
-        withAnimation(.spring(duration: 0.35)) {
+        withAnimation(Motion.panel) {
             selectedSpot = nil
         }
     }
@@ -117,11 +137,11 @@ struct MapTab: View {
         let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
         let name = trimmed.isEmpty ? "Unnamed spot" : trimmed
 
-        withAnimation(.spring(duration: 0.35)) {
+        withAnimation(Motion.panel) {
             pendingCoordinate = nil
         }
         newName = ""
 
-        await spots.add(name, coordinate)
+        await store.add(name, coordinate)
     }
 }

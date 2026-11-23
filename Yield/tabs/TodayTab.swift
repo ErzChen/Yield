@@ -3,7 +3,7 @@ import SwiftUI
 struct TodayTab: View {
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: Size.pagePadding) {
+            VStack(alignment: .leading, spacing: Size.large) {
                 ConditionsCard()
                 LikelyToday()
             }
