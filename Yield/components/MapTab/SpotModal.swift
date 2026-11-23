@@ -88,22 +88,22 @@ struct SpotModal: View {
     let onAddSighting: () -> Void
 
     var body: some View {
-        let sightings = store.sightings(for: spot)
+        let visits = store.visits(for: spot)
 
         Modal(onClose: onClose) {
             Text(spot.name)
                 .font(.besleyBold(Font.title))
                 .foregroundStyle(Color.textPrimary)
-            Text(sightings.isEmpty ? "No sightings yet" : "\(sightings.count) \(sightings.count > 1 ? "sightings" : "sighting")")
+            Text(visits.isEmpty ? "No visits yet" : "\(visits.count) \(visits.count > 1 ? "visits" : "visit")")
                 .font(.manropeRegular(Font.body))
                 .foregroundStyle(Color.textSecondary)
 
-            if !sightings.isEmpty {
+            if !visits.isEmpty {
                 VStack(spacing: Size.small) {
-                    ForEach(sightings.prefix(2)) {
-                        sighting in
+                    ForEach(visits.prefix(2)) {
+                        visit in
 
-                        sightingCard(sighting)
+                        visitCard(visit)
                     }
                 }
                 .padding(.top, Size.medium)
@@ -123,22 +123,28 @@ struct SpotModal: View {
         }
     }
     
-    private func sightingCard(_ sighting: Sighting) -> some View {
-        HStack(alignment: .center, spacing: Size.small) {
+    private func visitCard(_ visit: Visit) -> some View {
+        let finds = store.finds(for: visit)
+        
+        return HStack(alignment: .center, spacing: Size.small) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(sighting.speciesName)
-                    .font(.besleyMedium(Font.body))
-                    .foregroundStyle(Color.textPrimary)
-                    .lineHeight(.normal)
-
-                Text(sighting.date.formatted(date: .abbreviated, time: .omitted))
+                Text(finds.isEmpty
+                     ? "Checked, nothing"
+                     : finds.map { $0.speciesName }.joined(separator: ", ")
+                )
+                .lineLimit(1)
+                .font(.besleyMedium(Font.body))
+                .foregroundStyle(Color.textPrimary)
+                .lineHeight(.normal)
+                
+                Text(visit.date.formatted(date: .abbreviated, time: .omitted))
                     .font(.manropeRegular(Font.bodySmall))
                     .foregroundStyle(Color.textSecondary)
             }
 
             Spacer()
 
-            Text("\(sighting.amount)")
+            Text("\(finds.count)")
                 .font(.manropeRegular(Font.bodySmall))
                 .monospacedDigit()
                 .foregroundStyle(Color.textPrimary)

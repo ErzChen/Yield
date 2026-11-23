@@ -21,7 +21,7 @@ struct MapTab: View {
                         species, amount in
 
                         Task {
-                            await store.addSighting(to: spot, species: species, amount: amount)
+                            await store.addVisit(to: spot, domains: species.domain, finds: [(speciesId: species.id, speciesName: species.common_name, amount: amount)])
                         }
                     }
                 }
