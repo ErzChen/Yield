@@ -9,6 +9,9 @@ struct MapTab: View {
     @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
     @State private var selectedSpot: Spot?
     @State private var addingTo: Spot?
+    @State private var logging: Spot?
+    @State private var checkingNothing: Spot?
+    @State private var openedSpot: Spot?
     
     var body: some View {
         NavigationStack {
@@ -21,9 +24,18 @@ struct MapTab: View {
                         species, amount in
 
                         Task {
-                            await store.addVisit(to: spot, domains: species.domain, finds: [(speciesId: species.id, speciesName: species.common_name, amount: amount)])
+                            await store.addVisit(
+                                to: spot,
+                                domains: species.domain,
+                                finds: [(speciesId: species.id, speciesName: species.common_name, amount: amount)]
+                            )
                         }
                     }
+                }
+                .navigationDestination(item: $openedSpot) {
+                    spot in
+                    
+                    SpotPage(spot: spot)
                 }
         }
     }
@@ -62,12 +74,53 @@ struct MapTab: View {
         .mapStyle(.imagery(elevation: .realistic))
         .overlay(alignment: .bottom) {
             if let spot = selectedSpot {
-                SpotModal(spot: spot, onClose: closeSpot, onAddSighting: {
-                    addingTo = spot
-                })
-                    .id(spot.id)
-                    .padding(Size.pagePadding)
-                    .transition(.move(edge: .bottom))
+                SpotModal(
+                    spot: spot,
+                    onClose: closeSpot,
+                    onLog: {
+                        withAnimation(Motion.panel) {
+                            selectedSpot = nil
+                            logging = spot
+                        }
+                    },
+                    onOpenSpot: {
+                        openedSpot = spot
+                    }
+                )
+                .id(spot.id)
+            } else if let spot = logging {
+                LogChoiceModal(
+                    onFound: {
+                        withAnimation(Motion.panel) {
+                            logging = nil
+                            addingTo = spot
+                            selectedSpot = spot
+                        }
+                    },
+                    onNothing: {
+                        withAnimation(Motion.panel) {
+                            logging = nil
+                            checkingNothing = spot
+                        }
+                    },
+                    onCancel: {
+                        withAnimation(Motion.panel) {
+                            logging = nil
+                            selectedSpot = spot
+                        }
+                    }
+                )
+            } else if let spot = checkingNothing {
+                CheckedNothingModal(
+                    onSave: {
+                        domains in
+                        
+                        Task {
+                            await saveNothing(for: spot, domains: domains)
+                        }
+                    },
+                    onCancel: cancelNothing
+                )
             } else if pendingCoordinate != nil {
                 SaveSpotModal(
                     name: newName,
@@ -78,8 +131,6 @@ struct MapTab: View {
                     },
                     onCancel: cancelPending
                 )
-                .padding(Size.pagePadding)
-                .transition(.move(edge: .bottom))
             } else {
                 HStack(alignment: .bottom) {
                     Spacer()
@@ -143,5 +194,20 @@ struct MapTab: View {
         newName = ""
 
         await store.add(name, coordinate)
+    }
+    
+    private func cancelNothing() {
+        withAnimation(Motion.panel) {
+            checkingNothing = nil
+        }
+    }
+    
+    private func saveNothing(for spot: Spot, domains: Set<String>) async {
+        withAnimation(Motion.panel) {
+            checkingNothing = nil
+            selectedSpot = spot
+        }
+        
+        await store.addVisit(to: spot, domains: domains.sorted().joined(separator: ","), finds: [])
     }
 }

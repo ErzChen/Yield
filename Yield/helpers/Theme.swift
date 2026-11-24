@@ -117,6 +117,7 @@ enum Size {
     // Map Tab
     static let speciesThumb: CGFloat = 48
     static let stepperFieldWidth: CGFloat = 72
+    static let logButtonWidth: CGFloat = 80
     
     // Library Tab
     static let domainHeight: CGFloat = 180

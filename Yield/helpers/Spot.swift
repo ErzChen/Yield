@@ -2,26 +2,6 @@ import SwiftUI
 import CoreLocation
 import GRDB
 
-struct Sighting: Identifiable, Codable, FetchableRecord, MutablePersistableRecord {
-    var id: Int64?
-    var spotId: Int64
-    var speciesId: Int
-    var speciesName: String
-    var amount: Int
-    var date: Date
-
-    enum CodingKeys: String, CodingKey {
-        case id, amount, date
-        case spotId = "spot_id"
-        case speciesId = "species_id"
-        case speciesName = "species_name"
-    }
-
-    mutating func didInsert(_ inserted: InsertionSuccess) {
-        id = inserted.rowID
-    }
-}
-
 struct Spot: Identifiable, Codable, Hashable, FetchableRecord, MutablePersistableRecord {
     var id: Int64?
     var name: String
@@ -80,14 +60,12 @@ struct Find: Codable, FetchableRecord, MutablePersistableRecord {
 
 @Observable final class SpotStore {
     var spots: [Spot] = []
-    var sightings: [Sighting] = []
     var visits: [Visit] = []
     var finds: [Find] = []
     let shared = UserDatabase.shared
 
     func load() async {
         spots = (try? await shared.fetchSpots()) ?? []
-        sightings = (try? await shared.fetchSightings()) ?? []
         visits = (try? await shared.fetchVisits()) ?? []
         finds = (try? await shared.fetchFinds()) ?? []
     }
@@ -99,13 +77,6 @@ struct Find: Codable, FetchableRecord, MutablePersistableRecord {
         } catch {
             print("Error creating new spot:", error)
         }
-    }
-
-    func sightings(for spot: Spot) -> [Sighting] {
-        guard let id = spot.id else {
-            return []
-        }
-        return sightings.filter { $0.spotId == id }
     }
     
     func visits(for spot: Spot) -> [Visit] {
@@ -141,24 +112,6 @@ struct Find: Codable, FetchableRecord, MutablePersistableRecord {
             visits.insert(new, at: 0)
         } catch {
             print("Error creating visit:", error)
-        }
-    }
-
-    func addSighting(to spot: Spot, species: SpeciesSummary, amount: Int) async {
-        guard let spotId = spot.id else {
-            return
-        }
-        do {
-            let new = try await shared.addSighting(
-                spotId: spotId,
-                speciesId: species.id,
-                speciesName: species.common_name,
-                amount: amount,
-                date: .now
-            )
-            sightings.insert(new, at: 0)
-        } catch {
-            print("Error creating sighting:", error)
         }
     }
 }

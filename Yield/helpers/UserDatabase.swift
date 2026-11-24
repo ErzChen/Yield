@@ -33,20 +33,6 @@ final class UserDatabase {
                 table.column("created_at", .datetime).notNull()
             }
             
-            try db.create(table: "sighting") {
-                table in
-
-                table.autoIncrementedPrimaryKey("id")
-                table.column("spot_id", .integer)
-                    .notNull()
-                    .indexed()
-                    .references("spot", onDelete: .cascade)
-                table.column("species_id", .integer).notNull()
-                table.column("species_name", .text).notNull()
-                table.column("amount", .integer).notNull()
-                table.column("date", .datetime).notNull()
-            }
-            
             try db.create(table: "visit") {
                 table in
 
@@ -102,42 +88,6 @@ extension UserDatabase {
             )
             try spot.insert(db)
             return spot
-        }
-    }
-}
-
-// Sightings
-extension UserDatabase {
-    func fetchSightings() async throws -> [Sighting] {
-        try await queue.read {
-            db in
-
-            try Sighting
-                .order(Column("date").desc)
-                .fetchAll(db)
-        }
-    }
-
-    func addSighting(
-        spotId: Int64,
-        speciesId: Int,
-        speciesName: String,
-        amount: Int,
-        date: Date
-    ) async throws -> Sighting {
-        try await queue.write {
-            db in
-
-            var sighting = Sighting(
-                id: nil,
-                spotId: spotId,
-                speciesId: speciesId,
-                speciesName: speciesName,
-                amount: amount,
-                date: date
-            )
-            try sighting.insert(db)
-            return sighting
         }
     }
 }
