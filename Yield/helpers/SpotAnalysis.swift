@@ -14,6 +14,9 @@ struct Reliability {
     var score: Double {
         Double(foundWeight + 1) / Double(totalWeight + 2)
     }
+    var interval: (low: Double, high: Double) {
+        wilsonInterval(successes: foundWeight, trials: totalWeight)
+    }
 }
 
 struct SpeciesReliability: Identifiable {
@@ -238,6 +241,24 @@ func timingWindow(
     return TimingWindow(start: start, end: end, years: byYear.count)
 }
 
+func wilsonInterval(
+    successes: Double,
+    trials: Double,
+    zScore: Double = 1.96
+) -> (low: Double, high: Double) {
+    guard trials > 0 else {
+        return (0, 1)
+    }
+    
+    let probability = successes / trials
+    let zSqrd = zScore * zScore
+    let denominator = 1 + zSqrd / trials
+    let center = (probability + zSqrd / (2 * trials)) / denominator
+    let margin = zScore * sqrt(probability * (1 - probability) / trials + zSqrd / (4 * trials * trials)) / denominator
+    
+    return (max(0, center - margin), min (1, center + margin))
+}
+
 #if DEBUG
 func daysAgo(_ n: Int) -> Date {
     return Calendar.current.date(byAdding: .day, value: -n, to: .now)!
@@ -307,5 +328,9 @@ func checkReliability() {
         print(row.name, row.reliability.found, row.reliability.total, row.reliability.score)
     }
     print("morel amount", typicalAmount(speciesId: 100, visits: visits, finds: finds) as Any)
+    print(wilsonInterval(successes: 3, trials: 3))
+    print(wilsonInterval(successes: 9, trials: 9))
+    print(wilsonInterval(successes: 2, trials: 4))
+    print(wilsonInterval(successes: 0, trials: 0))
 }
 #endif

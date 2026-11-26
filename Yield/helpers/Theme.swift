@@ -101,9 +101,12 @@ extension Font {
 }
 
 enum Size {
+    // General
+    static let infoCardMaxHeight: CGFloat = 420
+    
     // Icons
     static let iconInline: CGFloat = 16
-    static let iconNav: CGFloat = 22
+    static let iconNav: CGFloat = 20
     static let iconFeature: CGFloat = 24
     static let tapTarget: CGFloat = 44
     
@@ -120,9 +123,12 @@ enum Size {
     static let logButtonWidth: CGFloat = 80
     static let amountColumn: CGFloat = 44
     static let scoreColumn: CGFloat = 44
-    static let ringSize: CGFloat = 40
+    static let ringSize: CGFloat = 52
+    static let ringInset: CGFloat = 8
     static let barHeight: CGFloat = 8
     static let dayDot: CGFloat = 8
+    static let spotModalMaxHeight: CGFloat = 300
+    
     
     // Library Tab
     static let domainHeight: CGFloat = 180

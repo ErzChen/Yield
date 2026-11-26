@@ -40,9 +40,16 @@ struct RootView: View {
         }
         .background(Color.background)
         .task {
+            #if DEBUG
             checkReliability()
+            #endif
             location.start()
             await store.load()
+            #if DEBUG
+            if Debug.loadSampleData, let coordinate = location.coordinate {
+                await addSampleData(to: store, at: coordinate)
+            }
+            #endif
         }
     }
 }

@@ -44,7 +44,7 @@ struct Modal<Content: View, Footer: View>: View {
             RoundedRectangle(cornerRadius: Radius.card)
                 .fill(Color.surface)
         )
-        .frame(maxWidth: .infinity, maxHeight: 300, alignment: .bottom)
+        .frame(maxWidth: .infinity, maxHeight: Size.spotModalMaxHeight, alignment: .bottom)
         .appShadow()
         .offset(y: dragOffset)
         .padding(Size.pagePadding)
@@ -175,6 +175,7 @@ struct SpotModal: View {
 
     var body: some View {
         let visits = store.visits(for: spot)
+        let best = store.reliabilities(for: spot).first { $0.reliability.hasEnoughData }
 
         Modal(onClose: onClose) {
             Text(spot.name)
@@ -183,10 +184,30 @@ struct SpotModal: View {
             Text(visits.isEmpty ? "No visits yet" : "\(visits.count) \(visits.count > 1 ? "visits" : "visit")")
                 .font(.manropeRegular(Font.body))
                 .foregroundStyle(Color.textSecondary)
-
+            
+            if let best {
+                HStack(alignment: .center) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Most reliable")
+                            .font(.manropeRegular(Font.label))
+                            .foregroundStyle(Color.textSecondary)
+                        Text(best.name)
+                            .font(.besleyMedium(Font.body))
+                            .foregroundStyle(Color.textPrimary)
+                            .lineLimit(1)
+                    }
+                    Spacer()
+                    ScoreRing(
+                        score: best.reliability.score,
+                        range: best.reliability.interval
+                    )
+                }
+                .padding(.top, Size.medium)
+            }
+            
             if !visits.isEmpty {
                 VStack(spacing: Size.small) {
-                    ForEach(visits.prefix(2)) {
+                    ForEach(visits.prefix(best == nil ? 2 : 1)) {
                         visit in
 
                         VisitCard(visit: visit)
@@ -220,6 +241,9 @@ struct SpotModal: View {
                         }
                 }
             }
+        }
+        .task(id: spot.id) {
+            await store.loadPhenology(for: spot)
         }
     }
 }

@@ -49,18 +49,34 @@ struct DayDots: View {
 
 struct ScoreRing: View {
     let score: Double?
+    var range: (low: Double, high: Double)? = nil
 
     var body: some View {
         ZStack {
+            if let range {
+                Circle()
+                    .trim(from: range.low, to: range.high)
+                    .stroke(
+                        Color.accent.opacity(0.35),
+                        style: StrokeStyle(lineWidth: 3, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .padding(2)
+            }
+
             Circle()
                 .stroke(Color.border, lineWidth: 4)
+                .padding(Size.ringInset)
+
             if let score {
                 Circle()
                     .trim(from: 0, to: score)
                     .stroke(Color.accent, style: StrokeStyle(lineWidth: 4, lineCap: .round))
                     .rotationEffect(.degrees(-90))
+                    .padding(Size.ringInset)
             }
-            Text(score != nil ? "\(Int((score! * 100).rounded()))%" : "–")
+
+            Text(score.map { "\(Int(($0 * 100).rounded()))%" } ?? "–")
                 .font(.manropeBold(Font.caption))
                 .monospacedDigit()
                 .foregroundStyle(score == nil ? Color.textSecondary : Color.textPrimary)
@@ -104,8 +120,11 @@ struct SpeciesReliabilityRow: View {
                 .foregroundStyle(row.typicalAmount == nil ? Color.textSecondary : Color.textPrimary)
                 .frame(width: Size.amountColumn, alignment: .trailing)
 
-            ScoreRing(score: row.reliability.hasEnoughData ? row.reliability.score : nil)
-                .frame(width: Size.scoreColumn)
+            ScoreRing(
+                score: row.reliability.hasEnoughData ? row.reliability.score : nil,
+                range: row.reliability.hasEnoughData ? row.reliability.interval : nil
+            )
+            .frame(width: Size.scoreColumn)
         }
         .padding(Size.small)
         .bordered(.background, Radius.tile)
@@ -134,10 +153,29 @@ struct SpotPage: View {
                 
                 if !rows.isEmpty {
                     VStack(alignment: .leading, spacing: Size.small) {
-                        Text("Reliability")
-                            .font(.besleyMedium(Font.heading))
-                            .foregroundStyle(Color.textPrimary)
-
+                        HStack(alignment: .lastTextBaseline, spacing: Size.extraSmall) {
+                            Text("Reliability")
+                                .font(.besleyMedium(Font.heading))
+                                .foregroundStyle(Color.textPrimary)
+                            InfoButton("Reading the list") {
+                                InfoEntry("Score", "How often this species turns up on a day you look for it.") {
+                                    ScoreRing(score: 0.8)
+                                }
+                                InfoEntry("Uncertainty Arc", "The range of what the spot's actual score could be in. It narrows as you log more visits.") {
+                                    ScoreRing(score: 0.8, range: (low: 0.45, high: 1.0))
+                                }
+                                InfoEntry("Days", "Days with a find out of days you looked. Visits on the same day count once.") {
+                                    DayDots(found: 2, total: 3)
+                                }
+                                InfoEntry("Usual", "The typical amount on a day with a find.") {
+                                    Text("5")
+                                        .font(.manropeMedium(Font.body))
+                                        .monospacedDigit()
+                                        .foregroundStyle(Color.textPrimary)
+                                }
+                            }
+                        }
+                        
                         if rows.contains(where: { !$0.reliability.hasEnoughData }) {
                             Text("Scores appear after \(Reliability.minimumDays) days at a spot")
                                 .font(.manropeRegular(Font.bodySmall))
