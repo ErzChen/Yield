@@ -27,7 +27,12 @@ struct MapTab: View {
                             await store.addVisit(
                                 to: spot,
                                 domains: species.domain,
-                                finds: [(speciesId: species.id, speciesName: species.common_name, amount: amount)]
+                                finds: [NewFind(
+                                    speciesId: species.id,
+                                    speciesName: species.common_name,
+                                    speciesDomain: species.domain,
+                                    amount: amount
+                                )]
                             )
                         }
                     }

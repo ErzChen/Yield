@@ -55,6 +55,7 @@ final class UserDatabase {
                     .references("visit", onDelete: .cascade)
                 table.column("species_id", .integer).notNull()
                 table.column("species_name", .text).notNull()
+                table.column("species_domain", .text).notNull()
                 table.column("amount", .integer).notNull()
             }
         }
@@ -117,7 +118,7 @@ extension UserDatabase {
         spotId: Int64,
         domains: String,
         date: Date,
-        finds: [(speciesId: Int, speciesName: String, amount: Int)]
+        finds: [NewFind]
     ) async throws -> Visit {
         try await queue.write {
             db in
@@ -139,6 +140,7 @@ extension UserDatabase {
                     visitId: visitId,
                     speciesId: item.speciesId,
                     speciesName: item.speciesName,
+                    speciesDomain: item.speciesDomain,
                     amount: item.amount
                 )
                 

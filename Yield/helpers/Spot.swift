@@ -39,11 +39,19 @@ struct Visit: Identifiable, Codable, FetchableRecord, MutablePersistableRecord {
     }
 }
 
+typealias NewFind = (
+    speciesId: Int,
+    speciesName: String,
+    speciesDomain: String,
+    amount: Int
+)
+
 struct Find: Codable, FetchableRecord, MutablePersistableRecord {
     var id: Int64?
     var visitId: Int64
     var speciesId: Int
     var speciesName: String
+    var speciesDomain: String
     var amount: Int
     
     enum CodingKeys: String, CodingKey {
@@ -51,6 +59,7 @@ struct Find: Codable, FetchableRecord, MutablePersistableRecord {
         case visitId = "visit_id"
         case speciesId = "species_id"
         case speciesName = "species_name"
+        case speciesDomain = "species_domain"
     }
     
     mutating func didInsert(_ inserted: InsertionSuccess) {
@@ -62,6 +71,7 @@ struct Find: Codable, FetchableRecord, MutablePersistableRecord {
     var spots: [Spot] = []
     var visits: [Visit] = []
     var finds: [Find] = []
+    var phenology: [Int64: [Int: [Int: Double]]] = [:]
     let shared = UserDatabase.shared
 
     func load() async {
@@ -96,7 +106,8 @@ struct Find: Codable, FetchableRecord, MutablePersistableRecord {
     func addVisit(
         to spot: Spot,
         domains: String,
-        finds newFinds: [(speciesId: Int, speciesName: String, amount: Int)]
+        date: Date = .now,
+        finds newFinds: [NewFind]
     ) async {
         guard let spotId = spot.id else {
             return
@@ -105,7 +116,7 @@ struct Find: Codable, FetchableRecord, MutablePersistableRecord {
             let new = try await shared.addVisit(
                 spotId: spotId,
                 domains: domains,
-                date: .now,
+                date: date,
                 finds: newFinds
             )
             finds = try await shared.fetchFinds()
@@ -113,5 +124,36 @@ struct Find: Codable, FetchableRecord, MutablePersistableRecord {
         } catch {
             print("Error creating visit:", error)
         }
+    }
+    
+    func reliabilities(for spot: Spot) -> [SpeciesReliability] {
+        guard let id = spot.id else {
+            return []
+        }
+        return speciesReliabilities(
+            visits: visits(for: spot),
+            finds: finds,
+            phenology: phenology[id] ?? [:]
+        )
+    }
+    
+    func loadPhenology(for spot: Spot) async {
+        guard let spotId = spot.id else {
+            return
+        }
+        
+        var loaded: [Int: [Int: Double]] = [:]
+        
+        for id in reliabilities(for: spot).map(\.speciesId) {
+            let curve = await SpeciesDatabase.shared.seasonCurve(id, spot.coordinate)
+            
+            if curve.totalObs >= 10 {
+                loaded[id] = Dictionary(uniqueKeysWithValues: curve.levels.map {
+                    ($0.week, $0.phenology)
+                })
+            }
+        }
+        
+        phenology[spotId] = loaded
     }
 }

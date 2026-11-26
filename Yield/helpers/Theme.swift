@@ -118,6 +118,11 @@ enum Size {
     static let speciesThumb: CGFloat = 48
     static let stepperFieldWidth: CGFloat = 72
     static let logButtonWidth: CGFloat = 80
+    static let amountColumn: CGFloat = 44
+    static let scoreColumn: CGFloat = 44
+    static let ringSize: CGFloat = 40
+    static let barHeight: CGFloat = 8
+    static let dayDot: CGFloat = 8
     
     // Library Tab
     static let domainHeight: CGFloat = 180

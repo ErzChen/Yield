@@ -40,6 +40,7 @@ struct RootView: View {
         }
         .background(Color.background)
         .task {
+            checkReliability()
             location.start()
             await store.load()
         }
